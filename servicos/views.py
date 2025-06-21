@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.db.models import Q
 from .models import Servico, Item, ImagemServico
 from usuarios.models import Fornecedor, Organizador
 import json
+import unicodedata
 
 @login_required
 def meus_servicos(request):
@@ -32,9 +34,37 @@ def todos_servicos(request):
     #Busca todos os serviços ativos
     servicos = Servico.objects.filter(ativo=True).select_related('fornecedor__user').order_by('-data_criacao')
     
+    #Filtro por categoria
+    categoria = request.GET.get('categoria', 'todas')
+    if categoria != 'todas':
+        servicos = servicos.filter(fornecedor__categoria=categoria)
+    
+    #Filtro por tags
+    tag_busca = request.GET.get('tag', '').strip()
+    if tag_busca:
+        #Padroniza a tag de busca
+        tag_busca_normalizada = unicodedata.normalize('NFD', tag_busca.lower()).encode('ASCII', 'ignore').decode('ASCII')
+        
+        #Busca serviços com a tag inserida
+        servicos_filtrados = []
+        for servico in servicos:
+            tags_servico = servico.get_tags_list()
+            for tag in tags_servico:
+                tag_normalizada = unicodedata.normalize('NFD', tag.lower()).encode('ASCII', 'ignore').decode('ASCII')
+                if tag_busca_normalizada in tag_normalizada or tag_normalizada in tag_busca_normalizada:
+                    servicos_filtrados.append(servico)
+                    break
+        servicos = servicos_filtrados
+    
+    #Obter categorias disponíveis para o filtro
+    categorias_disponiveis = Fornecedor.CATEGORIA_CHOICES
+    
     return render(request, 'pages/todos_servicos.html', {
         'servicos': servicos,
-        'organizador': organizador
+        'organizador': organizador,
+        'categorias_disponiveis': categorias_disponiveis,
+        'categoria_atual': categoria,
+        'tag_atual': tag_busca
     })
 
 @login_required
