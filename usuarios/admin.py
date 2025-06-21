@@ -29,12 +29,48 @@ admin.site.register(User, CustomUserAdmin)
 
 @admin.register(Organizador)
 class OrganizadorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'telefone', 'endereco')
-    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'user__email')
-    list_filter = ('user__date_joined',)
+    list_display = ('user', 'cidade_display', 'estado_display', 'telefone_display', 'endereco_completo_display')
+    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'user__email', 'cidade', 'bairro')
+    list_filter = ('estado', 'user__date_joined')
+    
+    def cidade_display(self, obj):
+        return obj.cidade if obj.cidade != 'N/D' else 'Não informado'
+    cidade_display.short_description = 'Cidade'
+    
+    def estado_display(self, obj):
+        return obj.estado if obj.estado != 'N/D' else 'Não informado'
+    estado_display.short_description = 'Estado'
+    
+    def telefone_display(self, obj):
+        return obj.telefone if obj.telefone != 'N/D' else 'Não informado'
+    telefone_display.short_description = 'Telefone'
+    
+    def endereco_completo_display(self, obj):
+        if obj.cep == 'N/D':
+            return 'Endereço não informado'
+        return obj.endereco_completo()
+    endereco_completo_display.short_description = 'Endereço Completo'
 
 @admin.register(Fornecedor)
 class FornecedorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'categoria', 'telefone', 'endereco')
-    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'user__email')
-    list_filter = ('categoria', 'user__date_joined',)
+    list_display = ('user', 'categoria', 'cidade_display', 'estado_display', 'telefone_display', 'endereco_completo_display')
+    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'user__email', 'cidade', 'bairro')
+    list_filter = ('categoria', 'estado', 'user__date_joined')
+    
+    def cidade_display(self, obj):
+        return obj.cidade if obj.cidade != 'N/D' else 'Não informado'
+    cidade_display.short_description = 'Cidade'
+    
+    def estado_display(self, obj):
+        return obj.estado if obj.estado != 'N/D' else 'Não informado'
+    estado_display.short_description = 'Estado'
+    
+    def telefone_display(self, obj):
+        return obj.telefone if obj.telefone != 'N/D' else 'Não informado'
+    telefone_display.short_description = 'Telefone'
+    
+    def endereco_completo_display(self, obj):
+        if obj.cep == 'N/D':
+            return 'Endereço não informado'
+        return obj.endereco_completo()
+    endereco_completo_display.short_description = 'Endereço Completo'
