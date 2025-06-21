@@ -26,3 +26,5 @@ Thumbs.db
 # Ignora arquivos de migração
 **/migrations/*
 !**/migrations/__init__.py
+/migrations/
+__init__.py
