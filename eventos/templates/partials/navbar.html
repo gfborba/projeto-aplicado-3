@@ -1,9 +1,9 @@
 <nav class="navbar">
-    <ul>
+    <ul class="navbar-list navbar-list-left">
         <li><a href="{% url 'index' %}">Home</a></li>
     </ul>
 
-    <ul>
+    <ul class="navbar-list navbar-list-right">
         <li><a href="#">Olá, {{ user.first_name }}</a></li>
         <li><a href="{% url 'sair' %}">Sair</a></li>
     </ul>
