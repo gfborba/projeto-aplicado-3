@@ -38,8 +38,31 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'sass_processor',
+
     'usuarios',
     'eventos',
+]
+
+# Configurações SASS
+SASS_PROCESSOR_ENABLED = True
+SASS_PROCESSOR_ROOT = BASE_DIR / 'static'
+SASS_PROCESSOR_INCLUDE_DIRS = [
+    BASE_DIR / 'static' / 'scss',
+]
+
+# Configurações de arquivos estáticos
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Adicionar sass_processor ao finders
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'sass_processor.finders.CssFinder',
 ]
 
 MIDDLEWARE = [
@@ -117,7 +140,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

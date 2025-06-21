@@ -1,0 +1,10 @@
+<nav class="navbar">
+    <ul>
+        <li><a href="{% url 'index' %}">Home</a></li>
+    </ul>
+
+    <ul>
+        <li><a href="#">Olá, {{ user.first_name }}</a></li>
+        <li><a href="{% url 'sair' %}">Sair</a></li>
+    </ul>
+</nav>

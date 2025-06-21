@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 
 def cadastro(request):
     if request.method == "GET":
-        return render(request, 'cadastro.html')
+        return render(request, 'pages/cadastro.html')
     else:
         username = request.POST.get('username')
         firstname = request.POST.get('firstname')
@@ -16,7 +16,7 @@ def cadastro(request):
 
         if User.objects.filter(username=username).exists():
             contexto = {'useralredyexist': 'Usuário já existe'}
-            return render (request, 'cadastro.html', contexto)
+            return render (request, 'pages/cadastro.html', contexto)
         
         user = User.objects.create_user(
             username=username, 
@@ -27,12 +27,12 @@ def cadastro(request):
         user.save()
 
         print('Cadastro realizado')
-        return render (request, 'login.html')
+        return render (request, 'pages/login.html')
 
 def login(request):
 
     if request.method == "GET":
-        return render(request, 'login.html')
+        return render(request, 'pages/login.html')
     else:
         username = request.POST.get('username')
         senha = request.POST.get('senha')
@@ -45,10 +45,10 @@ def login(request):
             return redirect ('index')
         else:
             contexto = {'error': 'Usuário ou senha incorretos'}
-            return render (request, 'login.html', contexto)
+            return render (request, 'pages/login.html', contexto)
 
 
 @login_required
 def sair(request):
     logout(request)
-    return render (request, 'login.html')
+    return render(request, 'pages/login.html')
