@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Serviços</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Meus Serviços</h1>
+        
+        <div class="header-actions">
+            <a href="{% url 'cadastrar_servico' %}" class="btn-primary">Cadastrar Novo Serviço</a>
+        </div>
+        
+        {% if servicos %}
+            <div class="servicos-grid">
+                {% for servico in servicos %}
+                    <div class="servico-card">
+                        <h3>{{ servico.nome }}</h3>
+                        <p class="descricao">{{ servico.descricao|truncatewords:20 }}</p>
+                        
+                        <div class="servico-info">
+                            <span class="status {% if servico.ativo %}ativo{% else %}inativo{% endif %}">
+                                {% if servico.ativo %}Ativo{% else %}Inativo{% endif %}
+                            </span>
+                            <span class="itens">Itens: {{ servico.total_itens }}</span>
+                            <span class="imagens">{% if servico.tem_imagens %}📷{% endif %}</span>
+                        </div>
+                        
+                        <div class="servico-actions">
+                            <a href="{% url 'detalhes_servico' servico.id %}" class="btn-secondary">Ver Detalhes</a>
+                            <a href="{% url 'editar_servico' servico.id %}" class="btn-secondary">Editar</a>
+                        </div>
+                        
+                        <div class="servico-meta">
+                            <small>Criado em: {{ servico.data_criacao|date:"d/m/Y H:i" }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Você ainda não cadastrou nenhum serviço.</p>
+                <a href="{% url 'cadastrar_servico' %}" class="btn-primary">Cadastrar Primeiro Serviço</a>
+            </div>
+        {% endif %}
+        
+        <div class="back-link">
+            <a href="{% url 'index' %}">← Voltar ao Início</a>
+        </div>
+    </div>
+</body>
+</html> 

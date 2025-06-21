@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar {{ servico.nome }}</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Serviço</h1>
+        
+        <form method="POST" class="form-servico">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="nome">Nome do Serviço *</label>
+                <input type="text" id="nome" name="nome" value="{{ servico.nome }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="descricao">Descrição *</label>
+                <textarea id="descricao" name="descricao" rows="5" required>{{ servico.descricao }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="ativo" {% if servico.ativo %}checked{% endif %}>
+                    Serviço Ativo
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Salvar Alterações</button>
+                <a href="{% url 'detalhes_servico' servico.id %}" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+        
+        <div class="back-link">
+            <a href="{% url 'detalhes_servico' servico.id %}">← Voltar aos Detalhes</a>
+        </div>
+    </div>
+</body>
+</html> 

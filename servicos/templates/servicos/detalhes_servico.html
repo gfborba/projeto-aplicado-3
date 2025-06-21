@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ servico.nome }} - Detalhes</title>
+</head>
+<body>
+    <div class="container" data-servico-id="{{ servico.id }}">
+        <div class="servico-header">
+            <h1>{{ servico.nome }}</h1>
+            <div class="servico-status">
+                <span class="status {% if servico.ativo %}ativo{% else %}inativo{% endif %}">
+                    {% if servico.ativo %}Ativo{% else %}Inativo{% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <div class="servico-content">
+            <div class="servico-info">
+                <h3>Descrição</h3>
+                <p>{{ servico.descricao }}</p>
+            </div>
+            
+            <div class="servico-meta">
+                <p><strong>Criado em:</strong> {{ servico.data_criacao|date:"d/m/Y H:i" }}</p>
+                <p><strong>Última atualização:</strong> {{ servico.data_atualizacao|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+        
+        <div class="itens-section">
+            <h3>Itens do Serviço ({{ servico.total_itens }})</h3>
+            
+            <div class="adicionar-item">
+                <h4>Adicionar Novo Item</h4>
+                <form id="form-adicionar-item" class="form-item">
+                    <div class="form-row">
+                        <input type="text" id="nome-item" placeholder="Nome do item" required>
+                        <input type="number" id="quantidade-item" placeholder="Qtd" value="1" min="1">
+                        <button type="submit" class="btn-primary">Adicionar</button>
+                    </div>
+                    <textarea id="descricao-item" placeholder="Descrição (opcional)"></textarea>
+                </form>
+            </div>
+            
+            <div id="lista-itens" class="itens-lista">
+                {% for item in servico.itens.all %}
+                    <div class="item-card" data-item-id="{{ item.id }}">
+                        <div class="item-info">
+                            <h4>{{ item.nome }}</h4>
+                            {% if item.descricao %}
+                                <p>{{ item.descricao }}</p>
+                            {% endif %}
+                            <span class="quantidade">Quantidade: {{ item.quantidade }}</span>
+                        </div>
+                        <button class="btn-remover" onclick="removerItem({{ item.id }})">Remover</button>
+                    </div>
+                {% empty %}
+                    <p class="empty-items">Nenhum item cadastrado ainda.</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="servico-actions">
+            <a href="{% url 'editar_servico' servico.id %}" class="btn-secondary">Editar Serviço</a>
+            <a href="{% url 'meus_servicos' %}" class="btn-secondary">Voltar aos Serviços</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('form-adicionar-item').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nome = document.getElementById('nome-item').value;
+            const descricao = document.getElementById('descricao-item').value;
+            const quantidade = document.getElementById('quantidade-item').value;
+            
+            fetch('{% url "adicionar_item" servico.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `nome=${encodeURIComponent(nome)}&descricao=${encodeURIComponent(descricao)}&quantidade=${quantidade}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.erro) {
+                    alert('Erro: ' + data.erro);
+                } else {
+                    // Limpar formulário
+                    document.getElementById('nome-item').value = '';
+                    document.getElementById('descricao-item').value = '';
+                    document.getElementById('quantidade-item').value = '1';
+                    
+                    // Recarregar página para mostrar o novo item
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao adicionar item. Tente novamente.');
+            });
+        });
+        
+        function removerItem(itemId) {
+            if (confirm('Tem certeza que deseja remover este item?')) {
+                const servicoId = document.querySelector('.container').dataset.servicoId;
+                const url = `/servicos/${servicoId}/remover-item/${itemId}/`;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.erro) {
+                        alert('Erro: ' + data.erro);
+                    } else {
+                        // Remover o item da lista
+                        document.querySelector(`[data-item-id="${itemId}"]`).remove();
+                        
+                        // Atualizar contador
+                        const totalItens = document.querySelectorAll('.item-card').length;
+                        document.querySelector('.itens-section h3').textContent = `Itens do Serviço (${totalItens})`;
+                        
+                        // Mostrar mensagem se não há mais itens
+                        if (totalItens === 0) {
+                            document.getElementById('lista-itens').innerHTML = '<p class="empty-items">Nenhum item cadastrado ainda.</p>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao remover item. Tente novamente.');
+                });
+            }
+        }
+    </script>
+</body>
+</html> 
