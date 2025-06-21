@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from .models import Servico, Item, ImagemServico
-from usuarios.models import Fornecedor
+from usuarios.models import Fornecedor, Organizador
 import json
 
 @login_required
@@ -19,6 +19,45 @@ def meus_servicos(request):
     except Fornecedor.DoesNotExist:
         messages.error(request, 'Acesso restrito apenas para fornecedores.')
         return redirect('index')
+
+@login_required
+def todos_servicos(request):
+    #Lista todos os serviços disponíveis para organizadores
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+    except Organizador.DoesNotExist:
+        messages.error(request, 'Acesso restrito apenas para organizadores.')
+        return redirect('index')
+    
+    #Busca todos os serviços ativos
+    servicos = Servico.objects.filter(ativo=True).select_related('fornecedor__user').order_by('-data_criacao')
+    
+    return render(request, 'pages/todos_servicos.html', {
+        'servicos': servicos,
+        'organizador': organizador
+    })
+
+@login_required
+def visualizar_servico(request, servico_id):
+    #Permite que organizadores visualizem detalhes de um serviço
+    servico = get_object_or_404(Servico, id=servico_id)
+    
+    #Verifica se o usuário é organizador
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+    except Organizador.DoesNotExist:
+        messages.error(request, 'Acesso restrito apenas para organizadores.')
+        return redirect('index')
+    
+    #Verifica se o serviço está ativo
+    if not servico.ativo:
+        messages.error(request, 'Este serviço não está disponível.')
+        return redirect('todos_servicos')
+    
+    return render(request, 'pages/visualizar_servico.html', {
+        'servico': servico,
+        'organizador': organizador
+    })
 
 @login_required
 def cadastrar_servico(request):

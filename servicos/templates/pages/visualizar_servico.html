@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="servico-header">
+            <h1>{{ servico.nome }}</h1>
+            <div class="servico-status">
+                <span class="status ativo">Disponível</span>
+            </div>
+        </div>
+        
+        <div class="fornecedor-info">
+            <h3>Informações do Fornecedor</h3>
+            <p><strong>Nome:</strong> {{ servico.fornecedor.user.get_full_name|default:servico.fornecedor.user.username }}</p>
+            <p><strong>Categoria:</strong> {{ servico.fornecedor.get_categoria_display }}</p>
+            <p><strong>Telefone:</strong> {{ servico.fornecedor.telefone }}</p>
+            <p><strong>Endereço:</strong> {{ servico.fornecedor.endereco_completo }}</p>
+        </div>
+        
+        <div class="servico-content">
+            <div class="servico-info">
+                <h3>Descrição</h3>
+                <p>{{ servico.descricao }}</p>
+            </div>
+            
+            {% if servico.tags %}
+            <div class="servico-tags">
+                <h3>Tags</h3>
+                <div class="tags-list">
+                    {% for tag in servico.get_tags_list %}
+                        <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if servico.imagens.exists %}
+            <div class="servico-imagens">
+                <h3>Fotos do Serviço</h3>
+                <div class="imagens-grid">
+                    {% for imagem in servico.imagens.all %}
+                        <div class="imagem-item">
+                            <img src="{{ imagem.imagem.url }}" alt="{{ imagem.legenda|default:'Imagem do serviço' }}" style="max-width: 200px; height: auto;">
+                            {% if imagem.legenda %}
+                                <p>{{ imagem.legenda }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="servico-meta">
+                <p><strong>Criado em:</strong> {{ servico.data_criacao|date:"d/m/Y H:i" }}</p>
+                <p><strong>Última atualização:</strong> {{ servico.data_atualizacao|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+        
+        <div class="itens-section">
+            <h3>Itens do Serviço ({{ servico.total_itens }})</h3>
+            
+            <div id="lista-itens" class="itens-lista">
+                {% for item in servico.itens.all %}
+                    <div class="item-card">
+                        <div class="item-info">
+                            <h4>{{ item.nome }}</h4>
+                            {% if item.descricao %}
+                                <p>{{ item.descricao }}</p>
+                            {% endif %}
+                            {% if item.imagem %}
+                                <img src="{{ item.imagem.url }}" alt="{{ item.nome }}" style="max-width: 100px; height: auto;">
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="empty-items">Nenhum item cadastrado ainda.</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="servico-actions">
+            <a href="{% url 'chat_room' servico.fornecedor.user.username %}" class="btn-primary">💬 Conversar com Fornecedor</a>
+            <a href="{% url 'todos_servicos' %}" class="btn-secondary">← Voltar aos Serviços</a>
+        </div>
+    </div>
+{% endblock %}
