@@ -6,17 +6,26 @@
     <title>Login</title>
 </head>
 <body>
-    <form class="form-auth" action="{% url 'login' %}" method="POST"> {% csrf_token %}
-        <input class="form-input" type="text" name="username" placeholder="Usuário">
-        <input class="form-input" type="password" name="senha" placeholder="Senha">
-        <button class="button" type="submit">Entrar</button>
-        {% if error %}
-            <div class="error-message">
-                {{ error }}
-            </div>
-        {% endif %}
-    </form>
+    <div class="container">
+        <h1>Login</h1>
+        <form class="form-auth" action="{% url 'login' %}" method="POST">
+            {% csrf_token %}
+            <input class="form-input" type="text" name="username" placeholder="Usuário" required>
+            <input class="form-input" type="password" name="senha" placeholder="Senha" required>
+            <button class="button" type="submit">Entrar</button>
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </form>
 
-    <button class="button" id="register-button" type="button" onclick="window.location.href='../cadastro/'">Registrar-se</button>
+        <div class="register-section">
+            <p>Não tem uma conta?</p>
+            <a href="{% url 'escolha_cadastro' %}" class="button register-button">
+                Registrar-se
+            </a>
+        </div>
+    </div>
 </body>
 </html>

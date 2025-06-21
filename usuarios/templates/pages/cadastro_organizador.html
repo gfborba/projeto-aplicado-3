@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Organizador</title>
+   
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastro de Organizador</h1>
+        <form class="form-auth" action="{% url 'cadastro_organizador' %}" method="POST">
+            {% csrf_token %}
+            
+            <div class="field-group">
+                <input class="form-input" type="text" placeholder="Nome" name="firstname" required>
+                <input class="form-input" type="text" placeholder="Sobrenome" name="lastname" required>
+            </div>
+            
+            <input class="form-input" type="text" placeholder="Nome de usuário" name="username" required>
+            <input class="form-input" type="email" placeholder="E-mail" name="email" required>
+            <input class="form-input" type="password" placeholder="Senha" name="senha" required>
+            <input class="form-input" type="tel" placeholder="Telefone" name="telefone" required>
+            <textarea class="form-input" placeholder="Endereço completo" name="endereco" required></textarea>
+            
+            <button class="button" type="submit">Cadastrar como Organizador</button>
+            
+            {% if useralredyexist %}
+                <div class="error-message">
+                    {{ useralredyexist }}
+                </div>
+            {% endif %}
+        </form>
+        
+        <div class="back-link">
+            <a href="{% url 'escolha_cadastro' %}">← Voltar para escolha de cadastro</a>
+        </div>
+    </div>
+</body>
+</html> 
