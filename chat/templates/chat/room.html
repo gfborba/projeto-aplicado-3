@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat com {{ target_user.get_full_name|default:target_user.username }}</title>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-header">
+            <h1>Chat com {{ target_user.get_full_name|default:target_user.username }}</h1>
+            <p class="username">@{{ target_user.username }}</p>
+            <div class="chat-actions">
+                <a href="{% url 'chat_list' %}" class="btn-secondary">← Voltar às Conversas</a>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div id="chat-messages" class="messages-container">
+                {% for message in messages %}
+                    <div class="message {% if message.sender == request.user %}message-own{% else %}message-other{% endif %}">
+                        <div class="message-content">
+                            <p class="message-text">{{ message.message }}</p>
+                            <small class="message-time">{{ message.timestamp|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <div class="message-sender">
+                            {{ message.sender.get_full_name|default:message.sender.username }}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="no-messages">
+                        <p>Nenhuma mensagem ainda. Inicie a conversa!</p>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="message-input-container">
+                <form id="message-form" class="message-form">
+                    <input type="text" id="message-input" placeholder="Digite sua mensagem..." required>
+                    <button type="submit" class="btn-primary">Enviar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const roomName = "{{ target_user.username }}";
+        const currentUser = "{{ request.user.username }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        );
+
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+
+        // Função para adicionar mensagem na interface
+        function addMessage(message, sender, senderFullName, timestamp) {
+            const messageDiv = document.createElement('div');
+            const isOwnMessage = sender === currentUser;
+            
+            messageDiv.className = `message ${isOwnMessage ? 'message-own' : 'message-other'}`;
+            
+            const timestampDate = new Date(timestamp);
+            const formattedTime = timestampDate.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <p class="message-text">${message}</p>
+                    <small class="message-time">${formattedTime}</small>
+                </div>
+                <div class="message-sender">
+                    ${senderFullName || sender}
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Remover mensagem de "nenhuma mensagem" se existir
+            const noMessages = messagesContainer.querySelector('.no-messages');
+            if (noMessages) {
+                noMessages.remove();
+            }
+        }
+
+        // Event listener para envio de mensagem
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const message = messageInput.value.trim();
+            if (message) {
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                messageInput.value = '';
+            }
+        });
+
+        // WebSocket event listeners
+        chatSocket.onopen = function(e) {
+            console.log('Conexão WebSocket estabelecida');
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            addMessage(data.message, data.sender, data.sender_full_name, data.timestamp);
+        };
+
+        chatSocket.onclose = function(e) {
+            console.log('Conexão WebSocket fechada');
+        };
+
+        chatSocket.onerror = function(e) {
+            console.error('Erro na conexão WebSocket:', e);
+        };
+
+        // Scroll para o final das mensagens ao carregar
+        window.addEventListener('load', function() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+    </script>
+</body>
+</html> 

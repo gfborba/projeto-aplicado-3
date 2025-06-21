@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Conversas</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Minhas Conversas</h1>
+        
+        {% if conversations %}
+            <div class="conversations-list">
+                {% for conversation in conversations %}
+                    <div class="conversation-item">
+                        <div class="conversation-info">
+                            <h3>{{ conversation.other_user.get_full_name|default:conversation.other_user.username }}</h3>
+                            <p class="username">@{{ conversation.other_user.username }}</p>
+                            
+                            {% if conversation.last_message %}
+                                <p class="last-message">
+                                    <strong>{{ conversation.last_message.sender.get_full_name|default:conversation.last_message.sender.username }}:</strong>
+                                    {{ conversation.last_message.message|truncatechars:50 }}
+                                </p>
+                                <small class="timestamp">{{ conversation.last_message.timestamp|date:"d/m/Y H:i" }}</small>
+                            {% else %}
+                                <p class="no-messages">Nenhuma mensagem ainda</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="conversation-actions">
+                            <a href="{% url 'chat_room' conversation.other_user.username %}" class="btn-primary">Abrir Chat</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Você ainda não tem conversas.</p>
+                <p>Para iniciar uma conversa, procure por fornecedores ou organizadores no sistema.</p>
+            </div>
+        {% endif %}
+        
+        <div class="back-link">
+            <a href="{% url 'index' %}">← Voltar ao Início</a>
+        </div>
+    </div>
+</body>
+</html> 
