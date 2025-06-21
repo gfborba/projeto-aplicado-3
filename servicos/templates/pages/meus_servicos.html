@@ -17,6 +17,12 @@
             <div class="servicos-grid">
                 {% for servico in servicos %}
                     <div class="servico-card">
+                        {% if servico.imagens.exists %}
+                            <div class="servico-imagem">
+                                <img src="{{ servico.imagens.first.imagem.url }}" alt="{{ servico.nome }}" style="max-width: 100%; height: auto;">
+                            </div>
+                        {% endif %}
+                        
                         <h3>{{ servico.nome }}</h3>
                         <p class="descricao">{{ servico.descricao|truncatewords:20 }}</p>
                         

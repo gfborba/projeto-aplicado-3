@@ -22,10 +22,14 @@ class ServicoAdmin(admin.ModelAdmin):
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'servico', 'quantidade', 'data_criacao')
+    list_display = ('nome', 'servico', 'tem_imagem_display', 'data_criacao')
     list_filter = ('data_criacao', 'servico__fornecedor__categoria')
     search_fields = ('nome', 'descricao', 'servico__nome')
     readonly_fields = ('data_criacao',)
+    
+    def tem_imagem_display(self, obj):
+        return "Sim" if obj.imagem else "Não"
+    tem_imagem_display.short_description = 'Tem Imagem'
 
 @admin.register(ImagemServico)
 class ImagemServicoAdmin(admin.ModelAdmin):

@@ -12,7 +12,7 @@ def meus_servicos(request):
     try:
         fornecedor = Fornecedor.objects.get(user=request.user)
         servicos = Servico.objects.filter(fornecedor=fornecedor).order_by('-data_criacao')
-        return render(request, 'servicos/meus_servicos.html', {
+        return render(request, 'pages/meus_servicos.html', {
             'servicos': servicos,
             'fornecedor': fornecedor
         })
@@ -30,7 +30,7 @@ def cadastrar_servico(request):
         return redirect('index')
     
     if request.method == 'GET':
-        return render(request, 'servicos/cadastrar_servico.html', {
+        return render(request, 'pages/cadastrar_servico.html', {
             'fornecedor': fornecedor
         })
     else:
@@ -39,7 +39,7 @@ def cadastrar_servico(request):
         
         if not nome or not descricao:
             messages.error(request, 'Nome e descrição são obrigatórios.')
-            return render(request, 'servicos/cadastrar_servico.html', {
+            return render(request, 'pages/cadastrar_servico.html', {
                 'fornecedor': fornecedor,
                 'nome': nome,
                 'descricao': descricao
@@ -51,6 +51,14 @@ def cadastrar_servico(request):
             descricao=descricao
         )
         
+        #Imagens do serviço
+        imagens = request.FILES.getlist('imagens')
+        for imagem in imagens:
+            ImagemServico.objects.create(
+                servico=servico,
+                imagem=imagem
+            )
+        
         messages.success(request, f'Serviço "{nome}" cadastrado com sucesso!')
         return redirect('detalhes_servico', servico_id=servico.id)
 
@@ -59,7 +67,7 @@ def detalhes_servico(request, servico_id):
     #Mostra detalhes de um serviço específico
     servico = get_object_or_404(Servico, id=servico_id)
     
-    # Verificar se o usuário é o fornecedor do serviço
+    #Verifica se o usuário é o fornecedor do serviço
     try:
         fornecedor = Fornecedor.objects.get(user=request.user)
         if servico.fornecedor != fornecedor:
@@ -69,7 +77,7 @@ def detalhes_servico(request, servico_id):
         messages.error(request, 'Acesso restrito apenas para fornecedores.')
         return redirect('index')
     
-    return render(request, 'servicos/detalhes_servico.html', {
+    return render(request, 'pages/detalhes_servico.html', {
         'servico': servico,
         'fornecedor': fornecedor
     })
@@ -79,7 +87,7 @@ def adicionar_item(request, servico_id):
     #Adiciona um item ao serviço
     servico = get_object_or_404(Servico, id=servico_id)
     
-    # Verificar permissão
+    #Verifica permissão
     try:
         fornecedor = Fornecedor.objects.get(user=request.user)
         if servico.fornecedor != fornecedor:
@@ -90,30 +98,23 @@ def adicionar_item(request, servico_id):
     if request.method == 'POST':
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao', '')
-        quantidade = request.POST.get('quantidade', 1)
+        imagem = request.FILES.get('imagem')
         
         if not nome:
             return JsonResponse({'erro': 'Nome do item é obrigatório'}, status=400)
-        
-        try:
-            quantidade = int(quantidade)
-            if quantidade <= 0:
-                quantidade = 1
-        except ValueError:
-            quantidade = 1
         
         item = Item.objects.create(
             servico=servico,
             nome=nome,
             descricao=descricao,
-            quantidade=quantidade
+            imagem=imagem
         )
         
         return JsonResponse({
             'id': item.id,
             'nome': item.nome,
             'descricao': item.descricao,
-            'quantidade': item.quantidade,
+            'tem_imagem': bool(item.imagem),
             'data_criacao': item.data_criacao.strftime('%d/%m/%Y %H:%M')
         })
     
@@ -144,7 +145,7 @@ def editar_servico(request, servico_id):
     #Edita um serviço existente
     servico = get_object_or_404(Servico, id=servico_id)
     
-    # Verificar permissão
+    #Verifica permissão
     try:
         fornecedor = Fornecedor.objects.get(user=request.user)
         if servico.fornecedor != fornecedor:
@@ -155,7 +156,7 @@ def editar_servico(request, servico_id):
         return redirect('index')
     
     if request.method == 'GET':
-        return render(request, 'servicos/editar_servico.html', {
+        return render(request, 'pages/editar_servico.html', {
             'servico': servico,
             'fornecedor': fornecedor
         })
@@ -166,7 +167,7 @@ def editar_servico(request, servico_id):
         
         if not nome or not descricao:
             messages.error(request, 'Nome e descrição são obrigatórios.')
-            return render(request, 'servicos/editar_servico.html', {
+            return render(request, 'pages/editar_servico.html', {
                 'servico': servico,
                 'fornecedor': fornecedor
             })
@@ -175,6 +176,14 @@ def editar_servico(request, servico_id):
         servico.descricao = descricao
         servico.ativo = ativo
         servico.save()
+        
+        #Processa novas imagens do serviço
+        imagens = request.FILES.getlist('imagens')
+        for imagem in imagens:
+            ImagemServico.objects.create(
+                servico=servico,
+                imagem=imagem
+            )
         
         messages.success(request, f'Serviço "{nome}" atualizado com sucesso!')
         return redirect('detalhes_servico', servico_id=servico.id)

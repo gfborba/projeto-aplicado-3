@@ -22,6 +22,22 @@
                 <p>{{ servico.descricao }}</p>
             </div>
             
+            {% if servico.imagens.exists %}
+            <div class="servico-imagens">
+                <h3>Fotos do Serviço</h3>
+                <div class="imagens-grid">
+                    {% for imagem in servico.imagens.all %}
+                        <div class="imagem-item">
+                            <img src="{{ imagem.imagem.url }}" alt="{{ imagem.legenda|default:'Imagem do serviço' }}" style="max-width: 200px; height: auto;">
+                            {% if imagem.legenda %}
+                                <p>{{ imagem.legenda }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
             <div class="servico-meta">
                 <p><strong>Criado em:</strong> {{ servico.data_criacao|date:"d/m/Y H:i" }}</p>
                 <p><strong>Última atualização:</strong> {{ servico.data_atualizacao|date:"d/m/Y H:i" }}</p>
@@ -33,10 +49,11 @@
             
             <div class="adicionar-item">
                 <h4>Adicionar Novo Item</h4>
-                <form id="form-adicionar-item" class="form-item">
+                <form id="form-adicionar-item" class="form-item" enctype="multipart/form-data">
+                    {% csrf_token %}
                     <div class="form-row">
                         <input type="text" id="nome-item" placeholder="Nome do item" required>
-                        <input type="number" id="quantidade-item" placeholder="Qtd" value="1" min="1">
+                        <input type="file" id="imagem-item" name="imagem" accept="image/*">
                         <button type="submit" class="btn-primary">Adicionar</button>
                     </div>
                     <textarea id="descricao-item" placeholder="Descrição (opcional)"></textarea>
@@ -51,8 +68,11 @@
                             {% if item.descricao %}
                                 <p>{{ item.descricao }}</p>
                             {% endif %}
-                            <span class="quantidade">Quantidade: {{ item.quantidade }}</span>
+                            {% if item.imagem %}
+                                <img src="{{ item.imagem.url }}" alt="{{ item.nome }}" style="max-width: 100px; height: auto;">
+                            {% endif %}
                         </div>
+                        <button class="btn-remover" data-item-id="{{ item.id }}">Remover</button>
                     </div>
                 {% empty %}
                     <p class="empty-items">Nenhum item cadastrado ainda.</p>
@@ -67,20 +87,27 @@
     </div>
 
     <script>
+        // Event listener para adicionar item
         document.getElementById('form-adicionar-item').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const nome = document.getElementById('nome-item').value;
             const descricao = document.getElementById('descricao-item').value;
-            const quantidade = document.getElementById('quantidade-item').value;
+            const imagem = document.getElementById('imagem-item').files[0];
+            
+            const formData = new FormData();
+            formData.append('nome', nome);
+            formData.append('descricao', descricao);
+            if (imagem) {
+                formData.append('imagem', imagem);
+            }
             
             fetch('{% url "adicionar_item" servico.id %}', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 },
-                body: `nome=${encodeURIComponent(nome)}&descricao=${encodeURIComponent(descricao)}&quantidade=${quantidade}`
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
@@ -90,7 +117,7 @@
                     // Limpar formulário
                     document.getElementById('nome-item').value = '';
                     document.getElementById('descricao-item').value = '';
-                    document.getElementById('quantidade-item').value = '1';
+                    document.getElementById('imagem-item').value = '';
                     
                     // Recarregar página para mostrar o novo item
                     location.reload();
@@ -99,6 +126,17 @@
             .catch(error => {
                 console.error('Erro:', error);
                 alert('Erro ao adicionar item. Tente novamente.');
+            });
+        });
+        
+        // Event listeners para remover itens
+        document.addEventListener('DOMContentLoaded', function() {
+            const botoesRemover = document.querySelectorAll('.btn-remover');
+            botoesRemover.forEach(botao => {
+                botao.addEventListener('click', function() {
+                    const itemId = this.getAttribute('data-item-id');
+                    removerItem(itemId);
+                });
             });
         });
         

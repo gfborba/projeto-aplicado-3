@@ -22,7 +22,7 @@ class Item(models.Model):
     servico = models.ForeignKey(Servico, on_delete=models.CASCADE, related_name='itens')
     nome = models.CharField(max_length=200)
     descricao = models.TextField(blank=True, null=True)
-    quantidade = models.PositiveIntegerField(default=1)
+    imagem = models.ImageField(upload_to='itens/', blank=True, null=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

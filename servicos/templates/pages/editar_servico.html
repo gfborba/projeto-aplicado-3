@@ -9,7 +9,7 @@
     <div class="container">
         <h1>Editar Serviço</h1>
         
-        <form method="POST" class="form-servico">
+        <form method="POST" class="form-servico" enctype="multipart/form-data">
             {% csrf_token %}
             
             <div class="form-group">
@@ -21,6 +21,26 @@
                 <label for="descricao">Descrição *</label>
                 <textarea id="descricao" name="descricao" rows="5" required>{{ servico.descricao }}</textarea>
             </div>
+            
+            <div class="form-group">
+                <label for="imagens">Adicionar Fotos do Serviço</label>
+                <input type="file" id="imagens" name="imagens" multiple accept="image/*">
+                <small>Você pode selecionar múltiplas imagens</small>
+            </div>
+            
+            {% if servico.imagens.exists %}
+            <div class="form-group">
+                <label>Fotos Atuais</label>
+                <div class="imagens-atuais">
+                    {% for imagem in servico.imagens.all %}
+                        <div class="imagem-item">
+                            <img src="{{ imagem.imagem.url }}" alt="{{ imagem.legenda|default:'Imagem do serviço' }}" style="max-width: 150px; height: auto;">
+                            <p>{{ imagem.legenda|default:'Sem legenda' }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
             
             <div class="form-group">
                 <label>
