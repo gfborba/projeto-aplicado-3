@@ -4,3 +4,20 @@
 .venv
 __pycache__/
 *.py[cod]
+
+# Django
+db.sqlite3
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
