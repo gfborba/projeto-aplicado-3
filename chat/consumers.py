@@ -33,16 +33,23 @@ class ChatConsumer(WebsocketConsumer):
                 self.room.users.set(users)
             else:
                 self.room = room_qs.first()
+            
             self.room_group_name = self.room.token
-            async_to_sync(self.channel_layer.group_add)(
-                self.room_group_name, self.channel_name
-            )
-            self.accept()
+            
+            #Verifica se channel_layer existe
+            if hasattr(self, 'channel_layer') and self.channel_layer is not None:
+                async_to_sync(self.channel_layer.group_add)(
+                    self.room_group_name, self.channel_name
+                )
+                self.accept()
+            else:
+                print("Erro: channel_layer não está disponível")
+                self.close()
         else:
             self.close()
             
     def disconnect(self, close_code):
-        if hasattr(self, 'room_group_name'):
+        if hasattr(self, 'room_group_name') and hasattr(self, 'channel_layer') and self.channel_layer is not None:
             async_to_sync(self.channel_layer.group_discard)(
                 self.room_group_name, self.channel_name
             )
@@ -52,21 +59,37 @@ class ChatConsumer(WebsocketConsumer):
         if isinstance(self.scope["user"], AnonymousUser):
             return
             
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-        msg = Message.objects.create(
-            room=self.room, sender=self.scope["user"], message=message
-        )
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                "type": "chat_message",
-                "message": msg.message,
-                "sender": msg.sender.username,
-                "sender_full_name": msg.sender.get_full_name(),
-                "timestamp": msg.timestamp.isoformat(),
-            },
-        )
+        try:
+            text_data_json = json.loads(text_data)
+            message = text_data_json["message"]
+            
+            #Verifica se a mensagem não está vazia
+            if not message.strip():
+                return
+                
+            msg = Message.objects.create(
+                room=self.room, sender=self.scope["user"], message=message
+            )
+            
+            #Verifica se channel_layer existe antes de enviar
+            if hasattr(self, 'channel_layer') and self.channel_layer is not None:
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        "type": "chat_message",
+                        "message": msg.message,
+                        "sender": msg.sender.username,
+                        "sender_full_name": msg.sender.get_full_name(),
+                        "timestamp": msg.timestamp.isoformat(),
+                    },
+                )
+            else:
+                print("Erro: channel_layer não está disponível para envio")
+                
+        except json.JSONDecodeError:
+            print("Erro: JSON inválido recebido")
+        except Exception as e:
+            print(f"Erro ao processar mensagem: {e}")
         
     def chat_message(self, event):
         message = event["message"]
