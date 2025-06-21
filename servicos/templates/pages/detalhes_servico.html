@@ -22,6 +22,17 @@
                 <p>{{ servico.descricao }}</p>
             </div>
             
+            {% if servico.tags %}
+            <div class="servico-tags">
+                <h3>Tags</h3>
+                <div class="tags-list">
+                    {% for tag in servico.get_tags_list %}
+                        <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
             {% if servico.imagens.exists %}
             <div class="servico-imagens">
                 <h3>Fotos do Serviço</h3>

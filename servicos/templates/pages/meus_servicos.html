@@ -26,6 +26,17 @@
                         <h3>{{ servico.nome }}</h3>
                         <p class="descricao">{{ servico.descricao|truncatewords:20 }}</p>
                         
+                        {% if servico.tags %}
+                        <div class="servico-tags">
+                            {% for tag in servico.get_tags_list|slice:":3" %}
+                                <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                            {% if servico.get_tags_list|length > 3 %}
+                                <span class="tag-more">+{{ servico.get_tags_list|length|add:"-3" }} mais</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
                         <div class="servico-info">
                             <span class="status {% if servico.ativo %}ativo{% else %}inativo{% endif %}">
                                 {% if servico.ativo %}Ativo{% else %}Inativo{% endif %}

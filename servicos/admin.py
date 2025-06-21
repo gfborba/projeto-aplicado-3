@@ -3,9 +3,9 @@ from .models import Servico, Item, ImagemServico
 
 @admin.register(Servico)
 class ServicoAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'fornecedor', 'categoria_fornecedor', 'total_itens_display', 'tem_imagens_display', 'ativo', 'data_criacao')
+    list_display = ('nome', 'fornecedor', 'categoria_fornecedor', 'total_itens_display', 'tem_imagens_display', 'tags_display', 'ativo', 'data_criacao')
     list_filter = ('ativo', 'data_criacao', 'fornecedor__categoria')
-    search_fields = ('nome', 'descricao', 'fornecedor__user__first_name', 'fornecedor__user__last_name')
+    search_fields = ('nome', 'descricao', 'tags', 'fornecedor__user__first_name', 'fornecedor__user__last_name')
     readonly_fields = ('data_criacao', 'data_atualizacao')
     
     def categoria_fornecedor(self, obj):
@@ -19,6 +19,11 @@ class ServicoAdmin(admin.ModelAdmin):
     def tem_imagens_display(self, obj):
         return "Sim" if obj.tem_imagens() else "Não"
     tem_imagens_display.short_description = 'Tem Imagens'
+    
+    def tags_display(self, obj):
+        tags = obj.get_tags_list()
+        return ', '.join(tags[:3]) + ('...' if len(tags) > 3 else '') if tags else '-'
+    tags_display.short_description = 'Tags'
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):

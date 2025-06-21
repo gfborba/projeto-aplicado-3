@@ -36,6 +36,7 @@ def cadastrar_servico(request):
     else:
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao')
+        tags_json = request.POST.get('tags', '[]')
         
         if not nome or not descricao:
             messages.error(request, 'Nome e descrição são obrigatórios.')
@@ -45,10 +46,16 @@ def cadastrar_servico(request):
                 'descricao': descricao
             })
         
+        try:
+            tags = json.loads(tags_json) if tags_json else []
+        except:
+            tags = []
+        
         servico = Servico.objects.create(
             fornecedor=fornecedor,
             nome=nome,
-            descricao=descricao
+            descricao=descricao,
+            tags=tags
         )
         
         #Imagens do serviço
@@ -141,6 +148,67 @@ def remover_item(request, servico_id, item_id):
     return JsonResponse({'erro': 'Método não permitido'}, status=405)
 
 @login_required
+def adicionar_tag(request, servico_id):
+    #Adiciona uma tag ao serviço
+    servico = get_object_or_404(Servico, id=servico_id)
+    
+    #Verificar permissão
+    try:
+        fornecedor = Fornecedor.objects.get(user=request.user)
+        if servico.fornecedor != fornecedor:
+            return JsonResponse({'erro': 'Permissão negada'}, status=403)
+    except Fornecedor.DoesNotExist:
+        return JsonResponse({'erro': 'Acesso restrito para fornecedores'}, status=403)
+    
+    if request.method == 'POST':
+        tag = request.POST.get('tag', '').strip()
+        
+        if not tag:
+            return JsonResponse({'erro': 'Tag não pode estar vazia'}, status=400)
+        
+        #Verificar se a tag já existe
+        tags = servico.get_tags_list()
+        if tag in tags:
+            return JsonResponse({'erro': 'Esta tag já existe'}, status=400)
+        
+        servico.add_tag(tag)
+        
+        return JsonResponse({
+            'mensagem': 'Tag adicionada com sucesso',
+            'tags': servico.get_tags_list()
+        })
+    
+    return JsonResponse({'erro': 'Método não permitido'}, status=405)
+
+@login_required
+def remover_tag(request, servico_id):
+    #Remove uma tag do serviço
+    servico = get_object_or_404(Servico, id=servico_id)
+    
+    #Verificar permissão
+    try:
+        fornecedor = Fornecedor.objects.get(user=request.user)
+        if servico.fornecedor != fornecedor:
+            return JsonResponse({'erro': 'Permissão negada'}, status=403)
+    except Fornecedor.DoesNotExist:
+        return JsonResponse({'erro': 'Acesso restrito para fornecedores'}, status=403)
+    
+    if request.method == 'POST':
+        tag = request.POST.get('tag', '').strip()
+        
+        if not tag:
+            return JsonResponse({'erro': 'Tag não pode estar vazia'}, status=400)
+        
+        servico.remove_tag(tag)
+        
+        return JsonResponse({
+            'mensagem': 'Tag removida com sucesso',
+            'tags': servico.get_tags_list()
+        })
+    
+    return JsonResponse({'erro': 'Método não permitido'}, status=405)
+
+@login_required
 def editar_servico(request, servico_id):
     #Edita um serviço existente
     servico = get_object_or_404(Servico, id=servico_id)
@@ -163,6 +231,7 @@ def editar_servico(request, servico_id):
     else:
         nome = request.POST.get('nome')
         descricao = request.POST.get('descricao')
+        tags_json = request.POST.get('tags', '[]')
         ativo = request.POST.get('ativo') == 'on'
         
         if not nome or not descricao:
@@ -172,8 +241,14 @@ def editar_servico(request, servico_id):
                 'fornecedor': fornecedor
             })
         
+        try:
+            tags = json.loads(tags_json) if tags_json else []
+        except:
+            tags = []
+        
         servico.nome = nome
         servico.descricao = descricao
+        servico.tags = tags
         servico.ativo = ativo
         servico.save()
         

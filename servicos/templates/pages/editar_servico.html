@@ -23,6 +23,19 @@
             </div>
             
             <div class="form-group">
+                <label for="tags">Tags</label>
+                <div class="tags-input-container">
+                    <input type="text" id="tag-input" placeholder="Digite uma tag e clique em Adicionar">
+                    <button type="button" id="adicionar-tag-btn" class="btn-secondary">Adicionar</button>
+                </div>
+                <div id="tags-list" class="tags-list" data-tags="{{ servico.get_tags_list|join:',' }}">
+                    
+                </div>
+                <input type="hidden" id="tags-hidden" name="tags" value="[]">
+                <small>Adicione tags para facilitar a busca pelos organizadores</small>
+            </div>
+            
+            <div class="form-group">
                 <label for="imagens">Adicionar Fotos do Serviço</label>
                 <input type="file" id="imagens" name="imagens" multiple accept="image/*">
                 <small>Você pode selecionar múltiplas imagens</small>
@@ -59,5 +72,70 @@
             <a href="{% url 'detalhes_servico' servico.id %}">← Voltar aos Detalhes</a>
         </div>
     </div>
+
+    <script>
+        let tags = [];
+        
+        //Carrega tags existentes do atributo data-tags
+        const tagsListElement = document.getElementById('tags-list');
+        const existingTags = tagsListElement.getAttribute('data-tags');
+        if (existingTags) {
+            tags = existingTags.split(',').filter(tag => tag.trim() !== '');
+        }
+        
+        function atualizarTagsHidden() {
+            document.getElementById('tags-hidden').value = JSON.stringify(tags);
+        }
+        
+        function adicionarTag(tag) {
+            if (tag.trim() && !tags.includes(tag.trim())) {
+                tags.push(tag.trim());
+                atualizarTagsHidden();
+                renderizarTags();
+                document.getElementById('tag-input').value = '';
+            }
+        }
+        
+        function removerTag(tag) {
+            const index = tags.indexOf(tag);
+            if (index > -1) {
+                tags.splice(index, 1);
+                atualizarTagsHidden();
+                renderizarTags();
+            }
+        }
+        
+        function renderizarTags() {
+            const tagsList = document.getElementById('tags-list');
+            tagsList.innerHTML = '';
+            
+            tags.forEach(tag => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag-item';
+                tagElement.innerHTML = `
+                    <span class="tag-text">${tag}</span>
+                    <button type="button" class="btn-remover-tag" onclick="removerTag('${tag}')">×</button>
+                `;
+                tagsList.appendChild(tagElement);
+            });
+        }
+        
+        // Event listeners
+        document.getElementById('adicionar-tag-btn').addEventListener('click', function() {
+            const tagInput = document.getElementById('tag-input');
+            adicionarTag(tagInput.value);
+        });
+        
+        document.getElementById('tag-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                adicionarTag(this.value);
+            }
+        });
+        
+        // Inicializar
+        atualizarTagsHidden();
+        renderizarTags();
+    </script>
 </body>
 </html> 
