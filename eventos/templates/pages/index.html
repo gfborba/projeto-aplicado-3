@@ -1,5 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Home</h1>
+<div class="container">
+    <h1>Bem-vindo ao Sistema de Eventos</h1>
+    
+    <div class="welcome-content">
+        <p>Plataforma para conectar organizadores de eventos e fornecedores de serviços.</p>
+        
+        {% if is_fornecedor %}
+            <div class="fornecedor-actions">
+                <h2>Área do Fornecedor</h2>
+                <p>Gerencie seus serviços e conecte-se com organizadores de eventos.</p>
+                <a href="{% url 'meus_servicos' %}" class="btn-primary">Meus Serviços</a>
+            </div>
+        {% endif %}
+        
+        {% if is_organizador %}
+            <div class="organizador-actions">
+                <h2>Área do Organizador</h2>
+                <p>Encontre fornecedores e organize seus eventos.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %} 
