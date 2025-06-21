@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliar</title>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Avaliar</h1>
+        <a href="{% url 'logout' %}">SAIR</a>
+    </nav>
+    <form class="form-auth" action="{% url 'avaliacao' disciplina.id %}" method="POST"> {% csrf_token %}
+        <input class="form-input" type="number" placeholder="Nota" name="nota">
+        <input class="form-input" type="text" placeholder="Comentario" name="comentario">
+        <button class="button" type="submit">Avaliar</button>
+    </form>
+</body>
+</html>

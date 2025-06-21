@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <form class="form-auth" action="{% url 'login' %}" method="POST"> {% csrf_token %}
+        <input class="form-input" type="text" name="username" placeholder="Usuário">
+        <input class="form-input" type="password" name="senha" placeholder="Senha">
+        <button class="button" type="submit">Entrar</button>
+        {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+        {% endif %}
+    </form>
+
+    <button class="button" id="register-button" type="button" onclick="window.location.href='../cadastro/'">Registrar-se</button>
+</body>
+</html>
