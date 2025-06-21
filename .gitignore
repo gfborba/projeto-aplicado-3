@@ -1,3 +1,4 @@
+# Ambiente e Python
 /.env
 /.venv
 /venv
@@ -21,3 +22,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Ignora arquivos de migração
+**/migrations/*
+!**/migrations/__init__.py
