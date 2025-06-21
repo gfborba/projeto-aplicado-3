@@ -1,12 +1,5 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Organizador</title>
-   
-</head>
-<body>
+{% extends 'base_auth.html' %}
+{% block content %}
     <div class="container">
         <h1>Cadastro de Organizador</h1>
         <form class="form-auth" action="{% url 'cadastro_organizador' %}" method="POST">
@@ -115,5 +108,4 @@
             });
         });
     </script>
-</body>
-</html> 
+{% endblock %}
