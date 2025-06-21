@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1>Serviços Disponíveis</h1>
+        
+        <div class="filtros-section">
+            <h3 class="filtros-title">Filtros</h3>
+            <form method="GET" class="filtros-form" id="filtros-form">
+                <div class="filtro-grupo">
+                    <label for="categoria">Categoria:</label>
+                    <select name="categoria" id="categoria">
+                        <option value="todas" {% if categoria_atual == 'todas' %}selected{% endif %}>Todas as categorias</option>
+                        {% for codigo, nome in categorias_disponiveis %}
+                            <option value="{{ codigo }}" {% if categoria_atual == codigo %}selected{% endif %}>{{ nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filtro-grupo">
+                    <label for="tag">Tag:</label>
+                    <input type="text" name="tag" id="tag" placeholder="Digite uma tag..." value="{{ tag_atual }}">
+                </div>
+                
+                <button type="submit" class="btn-filtrar">Filtrar</button>
+                <a href="{% url 'todos_servicos' %}" class="btn-limpar">Limpar Filtros</a>
+            </form>
+        </div>
+        
+        <div class="resultados-info">
+            {% if servicos %}
+                {% if categoria_atual != 'todas' or tag_atual %}
+                    <p>Mostrando {{ servicos|length }} serviço{{ servicos|length|pluralize:"s" }} encontrado{{ servicos|length|pluralize:"s" }}
+                    {% if categoria_atual != 'todas' %}
+                        na categoria "{{ categoria_atual|title }}"
+                    {% endif %}
+                    {% if tag_atual %}
+                        {% if categoria_atual != 'todas' %} e {% else %} com {% endif %}tag "{{ tag_atual }}"
+                    {% endif %}
+                    </p>
+                {% else %}
+                    <p>Mostrando todos os {{ servicos|length }} serviço{{ servicos|length|pluralize:"s" }} disponível{{ servicos|length|pluralize:"s" }}</p>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+        {% if servicos %}
+            <div class="servicos-grid">
+                {% for servico in servicos %}
+                    <div class="servico-card">
+                        {% if servico.imagens.exists %}
+                            <div class="servico-imagem">
+                                <img src="{{ servico.imagens.first.imagem.url }}" alt="{{ servico.nome }}">
+                            </div>
+                        {% endif %}
+                        
+                        <h3>{{ servico.nome }}</h3>
+                        
+                        <div class="fornecedor-info">
+                            <p><strong>Fornecedor:</strong> {{ servico.fornecedor.user.get_full_name|default:servico.fornecedor.user.username }}</p>
+                            <p><strong>Categoria:</strong> {{ servico.fornecedor.get_categoria_display }}</p>
+                        </div>
+                        
+                        {% if servico.tags %}
+                        <div class="servico-tags">
+                            {% for tag in servico.get_tags_list|slice:":3" %}
+                                <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                            {% if servico.get_tags_list|length > 3 %}
+                                <span class="tag-more">+{{ servico.get_tags_list|length|add:"-3" }} mais</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="servico-info">
+                            <span class="imagens">{% if servico.tem_imagens %}📷{% endif %}</span>
+                        </div>
+                        
+                        <div class="servico-actions">
+                            <a href="{% url 'visualizar_servico' servico.id %}" class="btn-primary">Ver Mais</a>
+                            <a href="{% url 'chat_room' servico.fornecedor.user.username %}" class="btn-secondary">💬 Conversar</a>
+                        </div>
+                        
+                        <div class="servico-meta">
+                            <small>Criado em: {{ servico.data_criacao|date:"d/m/Y H:i" }}</small>
+                        </div>
+                    </div>
+                    <br> <br>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Nenhum serviço encontrado com os filtros aplicados.</p>
+                <p>Tente ajustar os filtros ou aguarde os fornecedores cadastrarem novos serviços.</p>
+            </div>
+        {% endif %}
+        
+        <div class="back-link">
+            <a href="{% url 'index' %}">← Voltar ao Início</a>
+        </div>
+    </div>
+
+    <script>
+        // Auto-submit do formulário quando a categoria mudar
+        document.getElementById('categoria').addEventListener('change', function() {
+            document.getElementById('filtros-form').submit();
+        });
+        
+        // Auto-submit do formulário quando a tag for digitada (com delay)
+        let timeoutId;
+        document.getElementById('tag').addEventListener('input', function() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                document.getElementById('filtros-form').submit();
+            }, 500); // Aguarda 500ms após o usuário parar de digitar
+        });
+        
+        // Permitir busca com Enter
+        document.getElementById('tag').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('filtros-form').submit();
+            }
+        });
+    </script>
+{% endblock %}

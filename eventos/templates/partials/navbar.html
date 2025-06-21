@@ -5,6 +5,7 @@
 
     <ul class="navbar-list navbar-list-right">
         <li><a href="#">Olá, {{ user.first_name }}</a></li>
+        <li><a href="{% url 'chat_list' %}" class="btn-primary">💬 Meus Chats</a></li>
         <li><a href="{% url 'sair' %}">Sair</a></li>
     </ul>
 </nav>

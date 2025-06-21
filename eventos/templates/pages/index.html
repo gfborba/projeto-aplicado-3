@@ -7,10 +7,6 @@
     <div class="welcome-content">
         <p>Plataforma para conectar organizadores de eventos e fornecedores de serviços.</p>
         
-        <div class="main-actions">
-            <a href="{% url 'chat_list' %}" class="btn-primary">💬 Meus Chats</a>
-        </div>
-        
         {% if is_fornecedor %}
             <div class="fornecedor-actions">
                 <h2>Área do Fornecedor</h2>
@@ -23,6 +19,7 @@
             <div class="organizador-actions">
                 <h2>Área do Organizador</h2>
                 <p>Encontre fornecedores e organize seus eventos.</p>
+                <a href="{% url 'todos_servicos' %}" class="btn-primary">Ver Todos os Serviços</a>
             </div>
         {% endif %}
     </div>

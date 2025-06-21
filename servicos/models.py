@@ -15,9 +15,11 @@ class Servico(models.Model):
     def __str__(self):
         return f"{self.nome} - {self.fornecedor.user.first_name}"
     
+    @property
     def total_itens(self):
         return self.itens.count()
     
+    @property
     def tem_imagens(self):
         return self.imagens.exists()
     
