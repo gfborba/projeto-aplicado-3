@@ -1,0 +1,271 @@
+// Animações e efeitos visuais para a home
+
+// Animação de entrada para elementos
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+// Aplicação das animações
+.container h1 {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.welcome-content {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.fornecedor-actions,
+.organizador-actions {
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.action-buttons {
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.home-dashboard {
+    animation: fadeInUp 0.8s ease-out 0.8s both;
+}
+
+.list-group {
+    animation: fadeInUp 0.8s ease-out 1s both;
+}
+
+// Efeitos de hover aprimorados
+.list-group-item {
+    &:hover {
+        .btn-sm {
+            animation: pulse 0.3s ease-in-out;
+        }
+    }
+}
+
+// Efeito de shimmer para botões
+.action-buttons .btn {
+    &:hover::before {
+        animation: shimmer 0.6s ease-in-out;
+    }
+}
+
+// Animação para estados de loading
+.loading {
+    position: relative;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid transparent;
+        border-top: 2px solid $roxo-1;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+// Efeito de destaque para eventos importantes
+.upcoming-event-item {
+    &:hover {
+        .event-item-countdown {
+            animation: pulse 0.5s ease-in-out;
+        }
+    }
+}
+
+// Animação para mensagens de estado vazio
+.no-events {
+    animation: fadeInUp 0.6s ease-out;
+    
+    &::before {
+        animation: pulse 2s ease-in-out infinite;
+    }
+}
+
+// Efeito de gradiente animado para títulos
+.welcome-content h2 {
+    background: linear-gradient(45deg, $roxo-1, $roxo-3, $roxo-1);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+// Efeito de entrada escalonada para botões
+.action-buttons .btn {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    
+    @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+            animation-delay: #{0.6 + ($i * 0.1)}s;
+        }
+    }
+}
+
+// Efeito de hover para cards de eventos
+.list-group-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+}
+
+// Animação para ícones nos botões
+.btn i {
+    transition: transform 0.3s ease;
+}
+
+.btn:hover i {
+    transform: scale(1.2);
+}
+
+// Efeito de ripple para botões
+.btn {
+    position: relative;
+    overflow: hidden;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    &:active::after {
+        width: 300px;
+        height: 300px;
+    }
+}
+
+// Animação para o calendário
+.calendar-wrapper {
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+}
+
+// Efeito de destaque para eventos próximos
+.upcoming-event-item {
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: translateX(5px);
+        background: rgba($roxo-3, 0.1);
+        border-radius: 8px;
+    }
+}
+
+// Animação para contadores
+.event-item-countdown {
+    transition: all 0.3s ease;
+    
+    &:hover {
+        transform: scale(1.1);
+        font-weight: 700;
+    }
+}
+
+// Efeito de loading skeleton
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+// Responsividade para animações
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .action-buttons .btn {
+        animation-delay: 0.6s !important;
+    }
+    
+    .list-group-item:hover {
+        transform: translateY(-2px) scale(1.01);
+    }
+} 

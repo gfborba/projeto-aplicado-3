@@ -5,6 +5,17 @@
     list-style: none;
 }
 
+.main-content{
+    max-width: 1200px;
+    margin: 0 auto
+}
+
+// Importação da fonte Inter
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @import 'vars';
 @import 'components/navbar';
 @import 'components/mapa';
+@import 'components/home';
+@import 'components/animations';
+@import 'components/utilities';
