@@ -525,7 +525,7 @@ def adicionar_mensagem_orcamento(request, solicitacao_id):
             return JsonResponse({'success': False, 'error': 'Acesso negado'})
     
     #Cria mensagem no histórico
-    HistoricoOrcamento.objects.create(
+    historico = HistoricoOrcamento.objects.create(
         solicitacao=solicitacao,
         tipo_usuario=tipo_usuario,
         mensagem=mensagem

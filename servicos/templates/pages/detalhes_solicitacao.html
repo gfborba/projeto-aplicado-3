@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="detalhes-solicitacao">
+{% csrf_token %}
+<div class="detalhes-solicitacao" data-solicitacao-id="{{ solicitacao.id }}">
     <div class="solicitacao-header">
         <h2>Solicitação de Orçamento</h2>
         <span class="status-badge status-{{ solicitacao.status }}">{{ solicitacao.get_status_display }}</span>
@@ -84,10 +85,10 @@
 
     <div class="adicionar-mensagem">
         <h3>Adicionar Mensagem</h3>
-        <form id="formMensagem">
+        <form id="formMensagem" method="post" autocomplete="off" onsubmit="return false;">
             {% csrf_token %}
             <textarea id="mensagem" name="mensagem" placeholder="Digite sua mensagem, pergunta ou consideração..." rows="4" required></textarea>
-            <button type="submit" class="btn btn-primary">Enviar Mensagem</button>
+            <button type="submit" class="btn btn-primary" onclick="enviarMensagem(); return false;">Enviar Mensagem</button>
         </form>
     </div>
 
@@ -316,25 +317,8 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Event listener para o formulário de mensagem
-        const formMensagem = document.getElementById('formMensagem');
-        if (formMensagem) {
-            formMensagem.addEventListener('submit', enviarMensagem);
-        }
-        
-        // Event listeners para os botões de status
-        const statusButtons = document.querySelectorAll('.status-btn');
-        statusButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const status = this.getAttribute('data-status');
-                atualizarStatus(status);
-            });
-        });
-    });
-    
-    function enviarMensagem(event) {
-        event.preventDefault();
+    function enviarMensagem() {
+        console.log('Função enviarMensagem chamada');
         
         const mensagem = document.getElementById('mensagem').value.trim();
         if (!mensagem) {
@@ -344,7 +328,10 @@
         
         const formData = new FormData();
         formData.append('mensagem', mensagem);
-        
+
+        console.log('Enviando mensagem:', mensagem);
+        console.log('URL:', '{% url "adicionar_mensagem_orcamento" solicitacao.id %}');
+
         fetch('{% url "adicionar_mensagem_orcamento" solicitacao.id %}', {
             method: 'POST',
             headers: {
@@ -352,11 +339,15 @@
             },
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
                 alert('Mensagem enviada com sucesso!');
-                location.reload(); // Recarregar para mostrar a nova mensagem
+                location.reload();
             } else {
                 alert('Erro: ' + data.error);
             }
@@ -373,5 +364,16 @@
             alert('Funcionalidade de atualização de status será implementada em breve.');
         }
     }
+    
+    // Event listeners para os botões de status
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusButtons = document.querySelectorAll('.status-btn');
+        statusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const status = this.getAttribute('data-status');
+                atualizarStatus(status);
+            });
+        });
+    });
 </script>
 {% endblock %} 

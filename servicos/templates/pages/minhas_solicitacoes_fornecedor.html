@@ -236,11 +236,83 @@
             .then(response => response.text())
             .then(html => {
                 document.getElementById('modalDetalhesContent').innerHTML = html;
+                // Adicionar event listeners após carregar o conteúdo
+                setupModalEventListeners(solicitacaoId);
             })
             .catch(error => {
                 console.error('Erro:', error);
                 document.getElementById('modalDetalhesContent').innerHTML = '<p>Erro ao carregar detalhes.</p>';
             });
+    }
+    
+    function setupModalEventListeners(solicitacaoId) {
+        // Event listeners para os botões de status
+        const statusButtons = document.querySelectorAll('.status-btn');
+        statusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const status = this.getAttribute('data-status');
+                atualizarStatus(status);
+            });
+        });
+    }
+    
+    function enviarMensagem() {
+        console.log('Função enviarMensagem chamada');
+        
+        const mensagem = document.getElementById('mensagem').value.trim();
+        if (!mensagem) {
+            alert('Por favor, digite uma mensagem.');
+            return;
+        }
+        
+        // Pegar o ID da solicitação do modal atual
+        const modalContent = document.getElementById('modalDetalhesContent');
+        const detalhesDiv = modalContent.querySelector('.detalhes-solicitacao');
+        const solicitacaoId = detalhesDiv.getAttribute('data-solicitacao-id');
+        
+        if (!solicitacaoId) {
+            alert('Erro: ID da solicitação não encontrado.');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('mensagem', mensagem);
+
+        console.log('Enviando mensagem:', mensagem);
+        console.log('Solicitação ID:', solicitacaoId);
+
+        fetch(`/servicos/adicionar-mensagem-orcamento/${solicitacaoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                alert('Mensagem enviada com sucesso!');
+                // Recarregar o conteúdo do modal
+                abrirModalDetalhes(solicitacaoId);
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar mensagem. Tente novamente.');
+        });
+    }
+    
+    function atualizarStatus(novoStatus) {
+        if (confirm('Tem certeza que deseja atualizar o status para "' + novoStatus + '"?')) {
+            // TODO: Implementar atualização de status
+            alert('Funcionalidade de atualização de status será implementada em breve.');
+        }
     }
     
     function fecharModalDetalhes() {
