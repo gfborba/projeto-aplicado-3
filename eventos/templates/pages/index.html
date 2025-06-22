@@ -18,17 +18,20 @@
             <div class="list-group">
                 {% for evento in eventos %}
                 <div class="list-group-item">
-                    <h5>{{ evento.nomeEvento }}</h5>
+                    <h5><a href="{% url 'detalhes_evento' evento.id %}">{{ evento.nomeEvento }}</a></h5>
                     <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
                     <p><strong>Local:</strong> {{ evento.localEvento }}</p>
                     {% if evento.endereco_completo %}
-                        <p><strong>Endereço:</strong> {{ evento.endereco_completo }}</p>
+                    <p><strong>Endereço:</strong> {{ evento.endereco_completo }}</p>
                     {% endif %}
                     {% if evento.previsao_participantes %}
-                        <p><strong>Previsão de Participantes:</strong> {{ evento.previsao_participantes }} pessoas</p>
+                    <p><strong>Previsão de Participantes:</strong> {{ evento.previsao_participantes }} pessoas</p>
                     {% endif %}
                     <p>{{ evento.descricaoEvento }}</p>
                     <p><small>Organizador: {{ evento.idUsuario.user.get_full_name }}</small></p>
+                    <a href="{% url 'detalhes_evento' evento.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> Detalhes
+                    </a>
                 </div>
                 {% endfor %}
             </div>
@@ -50,19 +53,22 @@
             <div class="list-group">
                 {% for evento in eventos %}
                 <div class="list-group-item">
-                    <h5>{{ evento.nomeEvento }}</h5>
+                    <h5><a href="{% url 'detalhes_evento' evento.id %}">{{ evento.nomeEvento }}</a></h5>
                     <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
                     <p><strong>Local:</strong> {{ evento.localEvento }}</p>
                     {% if evento.endereco_completo %}
-                        <p><strong>Endereço:</strong> {{ evento.endereco_completo }}</p>
+                    <p><strong>Endereço:</strong> {{ evento.endereco_completo }}</p>
                     {% endif %}
                     {% if evento.previsao_participantes %}
-                        <p><strong>Previsão de Participantes:</strong> {{ evento.previsao_participantes }} pessoas</p>
+                    <p><strong>Previsão de Participantes:</strong> {{ evento.previsao_participantes }} pessoas</p>
                     {% endif %}
                     <p>{{ evento.descricaoEvento }}</p>
                     <div class="mt-2">
                         <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-primary">Editar</a>
                         <a href="{% url 'excluir_evento' evento.id %}" class="btn btn-sm btn-danger">Excluir</a>
+                        <a href="{% url 'detalhes_evento' evento.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Detalhes
+                        </a>
                     </div>
                 </div>
                 {% endfor %}
