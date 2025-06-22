@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h2>Confirmar Exclusão de Avaliação</h2>
+        </div>
+        <div class="card-body">
+            <p>Tem certeza que deseja excluir sua avaliação para <strong>{{ avaliacao.fornecedor.user.get_full_name }}</strong>?</p>
+            <p><strong>Nota:</strong> {{ avaliacao.get_nota_display }}</p>
+            {% if avaliacao.comentario %}
+                <p><strong>Comentário:</strong> {{ avaliacao.comentario }}</p>
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmar Exclusão
+                </button>
+                <a href="{% url 'detalhes_fornecedor' avaliacao.fornecedor.id %}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

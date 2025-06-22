@@ -77,3 +77,7 @@ class AvaliacaoFornecedor(models.Model):
 
     def __str__(self):
         return f"Avaliação de {self.organizador} para {self.fornecedor} - Nota: {self.nota}"
+    
+    def delete_avaliacao(self):
+        """Método personalizado para deletar avaliação"""
+        self.delete()

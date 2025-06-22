@@ -384,3 +384,28 @@ def todos_fornecedores(request):
         'fornecedores': fornecedores,
         'is_organizador': is_organizador
     })
+
+@login_required
+def excluir_avaliacao(request, avaliacao_id):
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+    except Organizador.DoesNotExist:
+        messages.error(request, 'Apenas organizadores podem excluir avaliações.')
+        return redirect('index')
+    
+    avaliacao = get_object_or_404(AvaliacaoFornecedor, id=avaliacao_id)
+    
+    # Verifica se o organizador é o autor da avaliação
+    if avaliacao.organizador != organizador:
+        messages.error(request, 'Você só pode excluir suas próprias avaliações.')
+        return redirect('index')
+    
+    if request.method == 'POST':
+        fornecedor_id = avaliacao.fornecedor.id
+        avaliacao.delete()
+        messages.success(request, 'Avaliação excluída com sucesso!')
+        return redirect('detalhes_fornecedor', fornecedor_id=fornecedor_id)
+    
+    return render(request, 'pages/confirmar_exclusao_avaliacao.html', {
+        'avaliacao': avaliacao
+    })

@@ -42,9 +42,16 @@
                 {% if ja_avaliou %}
                 <div class="alert alert-info">
                     <p>Você avaliou este fornecedor com nota {{ avaliacao_usuario.nota }}.</p>
-                    <a href="{% url 'editar_avaliacao' avaliacao_usuario.id %}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil"></i> Editar Avaliação
-                    </a>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'editar_avaliacao' avaliacao_usuario.id %}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Editar Avaliação
+                        </a>
+                        <a href="{% url 'excluir_avaliacao' avaliacao_usuario.id %}"
+                            class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Excluir Avaliação
+                        </a>
+                    </div>
                 </div>
                 {% else %}
                 <a href="{% url 'avaliar_fornecedor' fornecedor.id %}" class="btn btn-primary">
@@ -93,4 +100,17 @@
         <i class="bi bi-arrow-left"></i> Voltar para Fornecedores
     </a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('a[href*="excluir_avaliacao"]');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Tem certeza que deseja excluir esta avaliação?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}
