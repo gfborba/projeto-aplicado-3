@@ -42,6 +42,9 @@
             {% if solicitacao.consideracoes %}
             <p><strong>Considerações iniciais:</strong> {{ solicitacao.consideracoes }}</p>
             {% endif %}
+            {% if solicitacao.valor_orcamento %}
+            <p><strong>Valor do Orçamento:</strong> <span class="valor-orcamento">R$ {{ solicitacao.valor_orcamento|floatformat:2 }}</span></p>
+            {% endif %}
         </div>
     </div>
 
@@ -94,6 +97,19 @@
 
     <div class="acoes-solicitacao">
         {% if tipo_usuario == 'fornecedor' %}
+        <div class="valor-orcamento-section">
+            <h3>Valor do Orçamento</h3>
+            <div class="valor-input-container">
+                <input type="text" id="valor_orcamento" name="valor_orcamento" 
+                       placeholder="R$ 0,00" 
+                       value="{% if solicitacao.valor_orcamento %}R$ {{ solicitacao.valor_orcamento|floatformat:2 }}{% endif %}"
+                       class="valor-input">
+                <button type="button" class="btn btn-primary" onclick="atualizarValorOrcamento(); return false;">
+                    {% if solicitacao.valor_orcamento %}Atualizar Valor{% else %}Definir Valor{% endif %}
+                </button>
+            </div>
+        </div>
+        
         <div class="status-actions">
             <h3>Atualizar Status</h3>
             <div class="status-buttons">
@@ -335,6 +351,40 @@
         margin-top: 10px;
         color: #6c757d;
         font-size: 14px;
+    }
+    
+    .valor-orcamento-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+    }
+    
+    .valor-orcamento-section h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 18px;
+    }
+    
+    .valor-input-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .valor-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    
+    .valor-orcamento {
+        font-weight: bold;
+        color: #28a745;
+        font-size: 18px;
     }
 </style>
 

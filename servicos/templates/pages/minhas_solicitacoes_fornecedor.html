@@ -347,6 +347,63 @@
         }
     }
     
+    function atualizarValorOrcamento() {
+        console.log('Função atualizarValorOrcamento chamada');
+        
+        //Pega o ID da solicitação do modal atual
+        const modalContent = document.getElementById('modalDetalhesContent');
+        const detalhesDiv = modalContent.querySelector('.detalhes-solicitacao');
+        const solicitacaoId = detalhesDiv.getAttribute('data-solicitacao-id');
+        
+        if (!solicitacaoId) {
+            alert('Erro: ID da solicitação não encontrado.');
+            return;
+        }
+        
+        const valorInput = document.getElementById('valor_orcamento');
+        console.log('Valor input encontrado:', valorInput);
+        
+        const valor = valorInput.value.trim();
+        console.log('Valor digitado:', valor);
+        
+        if (!valor) {
+            alert('Por favor, informe o valor do orçamento.');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('valor_orcamento', valor);
+        
+        console.log('URL:', `/servicos/atualizar-valor-orcamento/${solicitacaoId}/`);
+        console.log('CSRF Token:', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch(`/servicos/atualizar-valor-orcamento/${solicitacaoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                alert(data.message);
+                // Recarregar o conteúdo do modal
+                abrirModalDetalhes(solicitacaoId);
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao atualizar valor do orçamento. Tente novamente.');
+        });
+    }
+    
     function fecharModalDetalhes() {
         document.getElementById('modalDetalhes').style.display = 'none';
     }

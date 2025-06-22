@@ -18,4 +18,5 @@ urlpatterns = [
     path('detalhes-solicitacao/<int:solicitacao_id>/', views.detalhes_solicitacao, name='detalhes_solicitacao'),
     path('adicionar-mensagem-orcamento/<int:solicitacao_id>/', views.adicionar_mensagem_orcamento, name='adicionar_mensagem_orcamento'),
     path('atualizar-status-orcamento/<int:solicitacao_id>/', views.atualizar_status_orcamento, name='atualizar_status_orcamento'),
+    path('atualizar-valor-orcamento/<int:solicitacao_id>/', views.atualizar_valor_orcamento, name='atualizar_valor_orcamento'),
 ]

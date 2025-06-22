@@ -98,6 +98,7 @@ class SolicitacaoOrcamento(models.Model):
     evento = models.ForeignKey('eventos.Evento', on_delete=models.CASCADE, related_name='solicitacoes_orcamento')
     itens_selecionados = models.JSONField(default=list)  # Lista de IDs dos itens selecionados
     consideracoes = models.TextField(blank=True, null=True)
+    valor_orcamento = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name='Valor do Orçamento')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
     data_solicitacao = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)

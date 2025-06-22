@@ -606,3 +606,49 @@ def atualizar_status_orcamento(request, solicitacao_id):
         'novo_status': novo_status,
         'status_display': solicitacao.get_status_display()
     })
+
+@login_required
+def atualizar_valor_orcamento(request, solicitacao_id):
+    #Atualiza o valor do orçamento de uma solicitação
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método não permitido'})
+    
+    solicitacao = get_object_or_404(SolicitacaoOrcamento, id=solicitacao_id)
+    valor_orcamento = request.POST.get('valor_orcamento', '').strip()
+    
+    #Verifica se é o fornecedor da solicitação
+    try:
+        fornecedor = Fornecedor.objects.get(user=request.user)
+        if solicitacao.fornecedor != fornecedor:
+            return JsonResponse({'success': False, 'error': 'Permissão negada'})
+    except Fornecedor.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Acesso restrito apenas para fornecedores'})
+    
+    #Valida valor
+    if not valor_orcamento:
+        return JsonResponse({'success': False, 'error': 'Valor não informado'})
+    
+    try:
+        valor = float(valor_orcamento.replace(',', '.'))
+        if valor <= 0:
+            return JsonResponse({'success': False, 'error': 'Valor deve ser maior que zero'})
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Valor inválido'})
+    
+    #Atualiza valor
+    solicitacao.valor_orcamento = valor
+    solicitacao.save()
+    
+    #Cria mensagem no histórico sobre a atualização do valor
+    mensagem_valor = f"Valor do orçamento definido: R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+    HistoricoOrcamento.objects.create(
+        solicitacao=solicitacao,
+        tipo_usuario='fornecedor',
+        mensagem=mensagem_valor
+    )
+    
+    return JsonResponse({
+        'success': True,
+        'message': f'Valor do orçamento atualizado para R$ {valor:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.'),
+        'valor_formatado': f'R$ {valor:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+    })
