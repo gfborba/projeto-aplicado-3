@@ -11,6 +11,8 @@ class Organizador(models.Model):
     numero = models.CharField(max_length=10, default='N/D')
     complemento = models.CharField(max_length=100, blank=True, null=True)
     telefone = models.CharField(max_length=20, default='N/D')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - Organizador"
@@ -47,6 +49,8 @@ class Fornecedor(models.Model):
     complemento = models.CharField(max_length=100, blank=True, null=True)
     telefone = models.CharField(max_length=20, default='N/D')
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='outros')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.get_categoria_display()}"

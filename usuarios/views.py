@@ -5,6 +5,7 @@ from django.contrib.auth import login as login_django
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Organizador, Fornecedor
+from .utils import atualizar_coordenadas_usuario
 import json
 import requests
 
@@ -86,6 +87,13 @@ def cadastro_organizador(request):
             telefone=telefone
         )
         organizador.save()
+        
+        #Tentar geocodificar o CEP
+        try:
+            atualizar_coordenadas_usuario(organizador)
+        except Exception as e:
+            print(f"Erro ao geocodificar CEP: {e}")
+        
         return render(request, 'pages/login.html')
 
 def cadastro_fornecedor(request):
@@ -132,6 +140,12 @@ def cadastro_fornecedor(request):
             categoria=categoria
         )
         fornecedor.save()
+        
+        # Tentar geocodificar o CEP
+        try:
+            atualizar_coordenadas_usuario(fornecedor)
+        except Exception as e:
+            print(f"Erro ao geocodificar CEP: {e}")
 
         return render(request, 'pages/login.html')
     
