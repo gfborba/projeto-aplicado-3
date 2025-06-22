@@ -148,18 +148,28 @@ def atualizar_coordenadas_usuario(usuario):
     Returns:
         bool: True se as coordenadas foram atualizadas com sucesso
     """
-    if not usuario.cep or usuario.cep == 'N/D':
-        logger.warning(f"Usuário {usuario.user.username} não possui CEP válido")
-        return False
-    
-    latitude, longitude = geocodificar_cep(usuario.cep)
-    
-    if latitude is not None and longitude is not None:
-        usuario.latitude = latitude
-        usuario.longitude = longitude
-        usuario.save(update_fields=['latitude', 'longitude'])
-        logger.info(f"Coordenadas atualizadas para {usuario.user.username}: {latitude}, {longitude}")
-        return True
-    else:
-        logger.warning(f"Não foi possível geocodificar o CEP {usuario.cep} para {usuario.user.username}")
+    try:
+        if not usuario.cep or usuario.cep == 'N/D':
+            logger.warning(f"Usuário {usuario.user.username} não possui CEP válido")
+            return False
+        
+        # Verificar se já tem coordenadas válidas
+        if usuario.latitude and usuario.longitude:
+            logger.info(f"Usuário {usuario.user.username} já possui coordenadas válidas")
+            return True
+        
+        latitude, longitude = geocodificar_cep(usuario.cep)
+        
+        if latitude is not None and longitude is not None:
+            usuario.latitude = latitude
+            usuario.longitude = longitude
+            usuario.save(update_fields=['latitude', 'longitude'])
+            logger.info(f"Coordenadas atualizadas para {usuario.user.username}: {latitude}, {longitude}")
+            return True
+        else:
+            logger.warning(f"Não foi possível geocodificar o CEP {usuario.cep} para {usuario.user.username}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Erro ao atualizar coordenadas para {usuario.user.username}: {e}")
         return False 

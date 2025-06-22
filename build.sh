@@ -12,4 +12,19 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input
 
 # Apply any outstanding database migrations
-python manage.py migrate
+echo "Aplicando migrações..."
+python manage.py migrate --verbosity=2
+
+# Verificar status das migrações
+echo "Verificando status das migrações..."
+python manage.py showmigrations
+
+# Verificar conexão com banco de dados
+echo "Testando conexão com banco de dados..."
+python manage.py dbshell -c "SELECT version();" || echo "Erro na conexão com banco de dados"
+
+# Verificar se as tabelas principais existem
+echo "Verificando tabelas principais..."
+python manage.py dbshell -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('auth_user', 'usuarios_organizador', 'usuarios_fornecedor');" || echo "Erro ao verificar tabelas"
+
+echo "Build concluído!"
