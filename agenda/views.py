@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.contrib import messages
 import json
 from datetime import datetime, timedelta
+from django.db import models
 
 from .models import EventoAgenda
 from usuarios.models import Fornecedor, Organizador
@@ -44,24 +45,34 @@ def eventos_json(request):
     
     eventos_data = []
     for evento in eventos:
-        eventos_data.append({
-            'id': evento.id,
-            'title': evento.titulo,
-            'start': evento.data_inicio.isoformat(),
-            'end': evento.data_fim.isoformat(),
-            'allDay': evento.todo_dia,
-            'backgroundColor': evento.cor,
-            'borderColor': evento.cor,
-            'textColor': '#ffffff',
-            'extendedProps': {
-                'descricao': evento.descricao or '',
-                'tipo': evento.tipo,
-                'prioridade': evento.prioridade,
-                'local': evento.local or '',
-                'status': evento.status
-            }
-        })
-    
+        try:
+            # Garantir que campos obrigatórios estejam presentes
+            if not evento.data_inicio or not evento.data_fim or not evento.titulo or not evento.cor:
+                continue  # Ignorar eventos incompletos
+            is_compartilhado = bool(evento.fornecedor and evento.organizador)
+            eventos_data.append({
+                'id': evento.id,
+                'title': evento.titulo,
+                'start': evento.data_inicio.isoformat(),
+                'end': evento.data_fim.isoformat(),
+                'allDay': evento.todo_dia,
+                'backgroundColor': evento.cor,
+                'borderColor': evento.cor,
+                'textColor': '#ffffff',
+                'extendedProps': {
+                    'descricao': evento.descricao or '',
+                    'tipo': evento.tipo or '',
+                    'prioridade': evento.prioridade or '',
+                    'local': evento.local or '',
+                    'status': evento.status or '',
+                    'compartilhado': is_compartilhado,
+                    'fornecedor_nome': evento.fornecedor.user.get_full_name() if evento.fornecedor and evento.fornecedor.user else '',
+                    'organizador_nome': evento.organizador.user.get_full_name() if evento.organizador and evento.organizador.user else ''
+                }
+            })
+        except Exception as e:
+            print(f"Erro ao processar evento {evento.id}: {e}")
+            continue
     return JsonResponse(eventos_data, safe=False)
 
 @login_required
@@ -101,8 +112,24 @@ def criar_compromisso(request):
         #Associar ao tipo de usuário correto
         if tipo_usuario == 'fornecedor':
             evento.fornecedor = fornecedor
+            # Se fornecedor selecionou um organizador, atrelar
+            organizador_id = data.get('organizador_id') or data.get('usuario_compartilhar_id')
+            if organizador_id:
+                try:
+                    organizador = Organizador.objects.get(id=organizador_id)
+                    evento.organizador = organizador
+                except Organizador.DoesNotExist:
+                    return JsonResponse({'error': 'Organizador não encontrado'}, status=400)
         else:
             evento.organizador = organizador
+            # Se organizador selecionou um fornecedor, atrelar
+            fornecedor_id = data.get('fornecedor_id') or data.get('usuario_compartilhar_id')
+            if fornecedor_id:
+                try:
+                    fornecedor = Fornecedor.objects.get(id=fornecedor_id)
+                    evento.fornecedor = fornecedor
+                except Fornecedor.DoesNotExist:
+                    return JsonResponse({'error': 'Fornecedor não encontrado'}, status=400)
         
         evento.save()
         
@@ -232,7 +259,10 @@ def detalhes_compromisso(request, evento_id):
         'prioridade': evento.prioridade,
         'local': evento.local,
         'status': evento.status,
-        'duracao': evento.duracao
+        'duracao': evento.duracao,
+        'compartilhado': evento.fornecedor and evento.organizador,
+        'fornecedor_nome': evento.fornecedor.user.get_full_name() if evento.fornecedor else '',
+        'organizador_nome': evento.organizador.user.get_full_name() if evento.organizador else ''
     })
 
 @login_required
@@ -240,19 +270,11 @@ def eventos_miniatura(request):
     """Retorna eventos para exibição em miniatura na página index"""
     try:
         fornecedor = Fornecedor.objects.get(user=request.user)
-        eventos = EventoAgenda.objects.filter(
-            fornecedor=fornecedor, 
-            ativo=True,
-            data_inicio__gte=timezone.now().date()
-        ).order_by('data_inicio')[:5]  # Limita a 5 eventos
+        eventos = EventoAgenda.objects.filter(fornecedor=fornecedor, ativo=True).order_by('data_inicio')[:5]
     except Fornecedor.DoesNotExist:
         try:
             organizador = Organizador.objects.get(user=request.user)
-            eventos = EventoAgenda.objects.filter(
-                organizador=organizador, 
-                ativo=True,
-                data_inicio__gte=timezone.now().date()
-            ).order_by('data_inicio')[:5]  # Limita a 5 eventos
+            eventos = EventoAgenda.objects.filter(organizador=organizador, ativo=True).order_by('data_inicio')[:5]
         except Organizador.DoesNotExist:
             eventos = []
     
@@ -262,9 +284,78 @@ def eventos_miniatura(request):
             'id': evento.id,
             'titulo': evento.titulo,
             'data_inicio': evento.data_inicio.strftime('%d/%m/%Y %H:%M'),
-            'tipo': evento.get_tipo_display(),
+            'tipo': evento.tipo,
             'cor': evento.cor,
-            'status': evento.status
+            'status': evento.status,
+            'compartilhado': False,
+            'fornecedor_nome': '',
+            'organizador_nome': ''
         })
     
     return JsonResponse(eventos_data, safe=False)
+
+@login_required
+def buscar_usuarios_para_compartilhar(request):
+    """Retorna lista de fornecedores ou organizadores para atrelar a compromissos"""
+    try:
+        fornecedor = Fornecedor.objects.get(user=request.user)
+        # Se é fornecedor, retorna organizadores
+        organizadores = Organizador.objects.all().order_by('user__first_name')
+        usuarios_data = []
+        for org in organizadores:
+            usuarios_data.append({
+                'id': org.id,
+                'nome': org.user.get_full_name(),
+                'email': org.user.email,
+                'tipo': 'organizador'
+            })
+        return JsonResponse(usuarios_data, safe=False)
+    except Fornecedor.DoesNotExist:
+        try:
+            organizador = Organizador.objects.get(user=request.user)
+            # Se é organizador, retorna fornecedores
+            fornecedores = Fornecedor.objects.all().order_by('user__first_name')
+            usuarios_data = []
+            for forn in fornecedores:
+                usuarios_data.append({
+                    'id': forn.id,
+                    'nome': forn.user.get_full_name(),
+                    'email': forn.user.email,
+                    'categoria': forn.categoria,
+                    'tipo': 'fornecedor'
+                })
+            return JsonResponse(usuarios_data, safe=False)
+        except Organizador.DoesNotExist:
+            return JsonResponse({'error': 'Usuário não encontrado'}, status=400)
+
+@login_required
+def eventos_miniatura_teste(request):
+    """Função de teste para verificar se há problemas"""
+    try:
+        # Verificar se há eventos na agenda
+        total_eventos = EventoAgenda.objects.count()
+        
+        # Buscar eventos simples
+        eventos = EventoAgenda.objects.all()[:5]
+        
+        eventos_data = []
+        for evento in eventos:
+            eventos_data.append({
+                'id': evento.id,
+                'titulo': evento.titulo,
+                'data_inicio': evento.data_inicio.strftime('%d/%m/%Y %H:%M'),
+                'tipo': evento.tipo,
+                'cor': evento.cor,
+                'status': 'teste',
+                'compartilhado': False,
+                'fornecedor_nome': '',
+                'organizador_nome': ''
+            })
+        
+        return JsonResponse({
+            'total_eventos': total_eventos,
+            'eventos': eventos_data
+        }, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

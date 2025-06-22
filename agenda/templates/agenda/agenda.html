@@ -12,6 +12,21 @@
         </div>
     </div>
     
+    <!-- Legenda -->
+    <div class="legenda-container" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+        <h4 style="margin: 0 0 10px 0; color: #333;">Legenda:</h4>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 16px; height: 16px; background: #3788d8; border-radius: 3px;"></div>
+                <span style="font-size: 14px;">Compromissos Pessoais</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 16px; height: 16px; background: #ff9800; border-radius: 3px;"></div>
+                <span style="font-size: 14px;">Compromissos Compartilhados</span>
+            </div>
+        </div>
+    </div>
+    
     <div class="calendar-container">
         <div id="calendar"></div>
     </div>
@@ -77,6 +92,15 @@
                 <div class="form-group">
                     <label for="cor">Cor do Evento</label>
                     <input type="color" id="cor" name="cor" value="#3788d8">
+                </div>
+                
+                <div class="form-group">
+                    <label for="usuario_compartilhar">Compartilhar com:</label>
+                    <select id="usuario_compartilhar" name="usuario_compartilhar">
+                        <option value="">Ninguém (compromisso pessoal)</option>
+                        <!-- Opções serão carregadas dinamicamente -->
+                    </select>
+                    <small class="form-text text-muted">Selecione um fornecedor ou organizador para compartilhar este compromisso</small>
                 </div>
                 
                 <div class="form-group">
@@ -351,7 +375,33 @@
             weekends: true,
             
             // Carregar eventos
-            events: '/agenda/compromissos/',
+            events: function(info, successCallback, failureCallback) {
+                fetch('/agenda/compromissos/')
+                .then(response => response.json())
+                .then(data => {
+                    const eventos = data.map(evento => {
+                        // Se é um compromisso compartilhado, usar cor especial
+                        let backgroundColor = evento.backgroundColor;
+                        let borderColor = evento.borderColor;
+                        
+                        if (evento.extendedProps && evento.extendedProps.compartilhado) {
+                            backgroundColor = '#ff9800'; // Laranja para compromissos compartilhados
+                            borderColor = '#ff9800';
+                        }
+                        
+                        return {
+                            ...evento,
+                            backgroundColor: backgroundColor,
+                            borderColor: borderColor
+                        };
+                    });
+                    successCallback(eventos);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar eventos:', error);
+                    failureCallback(error);
+                });
+            },
             
             // Selecionar data/hora
             select: function(arg) {
@@ -410,13 +460,41 @@
         document.getElementById('modalTitle').textContent = 'Novo Evento';
         document.getElementById('formEvento').reset();
         eventoAtual = null;
+        
+        // Carregar usuários para compartilhamento
+        carregarUsuariosParaCompartilhar();
     }
     
     function fecharModalEvento() {
         document.getElementById('modalEvento').style.display = 'none';
     }
     
+    function carregarUsuariosParaCompartilhar() {
+        fetch('/agenda/usuarios-para-compartilhar/')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('usuario_compartilhar');
+            // Manter a primeira opção (Ninguém)
+            select.innerHTML = '<option value="">Ninguém (compromisso pessoal)</option>';
+            
+            data.forEach(usuario => {
+                const option = document.createElement('option');
+                option.value = usuario.id;
+                option.textContent = `${usuario.nome} (${usuario.tipo})`;
+                if (usuario.categoria) {
+                    option.textContent += ` - ${usuario.categoria}`;
+                }
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Erro ao carregar usuários:', error);
+        });
+    }
+    
     function salvarEvento() {
+        const usuarioCompartilhar = document.getElementById('usuario_compartilhar').value;
+        
         const formData = {
             title: document.getElementById('titulo').value,
             description: document.getElementById('descricao').value,
@@ -428,6 +506,13 @@
             backgroundColor: document.getElementById('cor').value,
             allDay: document.getElementById('todo_dia').checked
         };
+        
+        // Adicionar ID do usuário para compartilhamento se selecionado
+        if (usuarioCompartilhar) {
+            // Determinar se é fornecedor_id ou organizador_id baseado no tipo de usuário atual
+            // Isso será determinado no backend
+            formData.usuario_compartilhar_id = usuarioCompartilhar;
+        }
         
         const url = eventoAtual ? `/agenda/compromisso/${eventoAtual}/atualizar/` : '/agenda/compromisso/criar/';
         const method = eventoAtual ? 'POST' : 'POST';
@@ -463,8 +548,24 @@
             eventoAtual = eventoId;
             document.getElementById('detalhesTitle').textContent = data.title;
             
+            let compartilhadoInfo = '';
+            if (data.compartilhado) {
+                compartilhadoInfo = `
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin: 10px 0; border-left: 4px solid #2196f3;">
+                        <p style="margin: 0; color: #1976d2; font-weight: 500;">
+                            <i class="fas fa-share-alt"></i> Compromisso Compartilhado
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">
+                            <strong>Fornecedor:</strong> ${data.fornecedor_nome}<br>
+                            <strong>Organizador:</strong> ${data.organizador_nome}
+                        </p>
+                    </div>
+                `;
+            }
+            
             const conteudo = `
                 <div class="evento-detalhes">
+                    ${compartilhadoInfo}
                     <p><strong>Título:</strong> ${data.title}</p>
                     <p><strong>Data de Início:</strong> ${new Date(data.start).toLocaleString('pt-BR')}</p>
                     <p><strong>Data de Fim:</strong> ${new Date(data.end).toLocaleString('pt-BR')}</p>

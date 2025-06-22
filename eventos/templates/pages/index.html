@@ -278,7 +278,33 @@
             weekends: true,
             
             // Carregar eventos
-            events: '/agenda/compromissos/',
+            events: function(info, successCallback, failureCallback) {
+                fetch('/agenda/compromissos/')
+                .then(response => response.json())
+                .then(data => {
+                    const eventos = data.map(evento => {
+                        // Se é um compromisso compartilhado, usar cor especial
+                        let backgroundColor = evento.backgroundColor;
+                        let borderColor = evento.borderColor;
+                        
+                        if (evento.extendedProps && evento.extendedProps.compartilhado) {
+                            backgroundColor = '#ff9800'; // Laranja para compromissos compartilhados
+                            borderColor = '#ff9800';
+                        }
+                        
+                        return {
+                            ...evento,
+                            backgroundColor: backgroundColor,
+                            borderColor: borderColor
+                        };
+                    });
+                    successCallback(eventos);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar eventos:', error);
+                    failureCallback(error);
+                });
+            },
             
             // Clicar em evento
             eventClick: function(arg) {
@@ -312,12 +338,20 @@
             
             let html = '';
             data.forEach(evento => {
+                let compartilhadoInfo = '';
+                if (evento.compartilhado) {
+                    if (evento.fornecedor_nome && evento.organizador_nome) {
+                        compartilhadoInfo = `<small style="color: #007bff; font-size: 11px;">Compartilhado: ${evento.fornecedor_nome} ↔ ${evento.organizador_nome}</small>`;
+                    }
+                }
+                
                 html += `
                     <div class="event-item">
                         <div class="event-color" style="background-color: ${evento.cor}"></div>
                         <div class="event-info">
                             <p class="event-title">${evento.titulo}</p>
                             <p class="event-date">${evento.data_inicio}</p>
+                            ${compartilhadoInfo}
                         </div>
                         <span class="event-type">${evento.tipo}</span>
                     </div>
