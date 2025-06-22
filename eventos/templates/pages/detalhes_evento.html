@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>{{ evento.nomeEvento }}</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
+            <p><strong>Local:</strong> {{ evento.localEvento }}</p>
+            {% if evento.endereco_completo %}
+                <p><strong>Endereço:</strong> {{ evento.endereco_completo }}</p>
+            {% endif %}
+            {% if evento.previsao_participantes %}
+                <p><strong>Previsão de Participantes:</strong> {{ evento.previsao_participantes }} pessoas</p>
+            {% endif %}
+            <p><strong>Descrição:</strong> {{ evento.descricaoEvento }}</p>
+            <p><small>Organizador: {{ evento.idUsuario.user.get_full_name }}</small></p>
+            
+            {% if is_fornecedor %}
+                <a href="{% url 'fazer_pergunta' evento.id %}" class="btn btn-primary mt-3">
+                    <i class="bi bi-question-circle"></i> Fazer Pergunta
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Perguntas e Respostas</h3>
+        </div>
+        <div class="card-body">
+            {% if perguntas %}
+                <div class="list-group">
+                    {% for pergunta in perguntas %}
+                        <div class="list-group-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="mb-1">Pergunta de {{ pergunta.fornecedor.user.get_full_name }}</h5>
+                                <small class="text-muted">{{ pergunta.data_criacao|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <p class="mb-3">{{ pergunta.texto }}</p>
+                            
+                            {% if pergunta.respondida %}
+                                <div class="card bg-light mb-2">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="card-title">Resposta do organizador</h6>
+                                            <small class="text-muted">{{ pergunta.resposta.data_criacao|date:"d/m/Y H:i" }}</small>
+                                        </div>
+                                        <p class="card-text">{{ pergunta.resposta.texto }}</p>
+                                    </div>
+                                </div>
+                            {% elif is_organizador_dono %}
+                                <a href="{% url 'responder_pergunta' pergunta.id %}" class="btn btn-sm btn-success">
+                                    <i class="bi bi-reply"></i> Responder
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Nenhuma pergunta foi feita sobre este evento ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <a href="{% url 'index' %}" class="btn btn-secondary mt-3">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+{% endblock %}

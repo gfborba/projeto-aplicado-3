@@ -24,3 +24,32 @@ class Evento(models.Model):
     
     def tem_coordenadas(self):
         return self.latitude is not None and self.longitude is not None
+    
+class Pergunta(models.Model):
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='perguntas')
+    fornecedor = models.ForeignKey('usuarios.Fornecedor', on_delete=models.CASCADE, related_name='perguntas_feitas')
+    texto = models.TextField(verbose_name='Pergunta', null=False, blank=False)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    respondida = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-data_criacao']
+        verbose_name = 'Pergunta'
+        verbose_name_plural = 'Perguntas'
+
+    def __str__(self):
+        return f"Pergunta de {self.fornecedor.user.username} sobre {self.evento.nomeEvento}"
+
+class Resposta(models.Model):
+    pergunta = models.OneToOneField(Pergunta, on_delete=models.CASCADE, related_name='resposta')
+    organizador = models.ForeignKey(Organizador, on_delete=models.CASCADE, related_name='respostas_dadas')
+    texto = models.TextField(verbose_name='Resposta', null=False, blank=False)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['data_criacao']
+        verbose_name = 'Resposta'
+        verbose_name_plural = 'Respostas'
+
+    def __str__(self):
+        return f"Resposta de {self.organizador.user.username} para pergunta #{self.pergunta.id}"

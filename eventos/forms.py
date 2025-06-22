@@ -1,5 +1,5 @@
 from django import forms
-from .models import Evento
+from .models import Evento, Pergunta, Resposta
 
 class EventoForm(forms.ModelForm):
     class Meta:
@@ -39,3 +39,33 @@ class EventoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['cep'].required = True
+
+class PerguntaForm(forms.ModelForm):
+    class Meta:
+        model = Pergunta
+        fields = ['texto']
+        widgets = {
+            'texto': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Digite sua pergunta sobre este evento...',
+                'class': 'form-control'
+            }),
+        }
+        labels = {
+            'texto': ''
+        }
+
+class RespostaForm(forms.ModelForm):
+    class Meta:
+        model = Resposta
+        fields = ['texto']
+        widgets = {
+            'texto': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Digite sua resposta...',
+                'class': 'form-control'
+            }),
+        }
+        labels = {
+            'texto': ''
+        }
