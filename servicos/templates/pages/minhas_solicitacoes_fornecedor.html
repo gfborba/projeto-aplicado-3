@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="header-section">
+        <h1>Solicitações de Orçamento Recebidas</h1>
+        <p>Gerencie todas as solicitações de orçamento que você recebeu de organizadores.</p>
+    </div>
+
+    {% if solicitacoes %}
+    <div class="solicitacoes-grid">
+        {% for solicitacao in solicitacoes %}
+        <div class="solicitacao-card">
+            <div class="solicitacao-header">
+                <h3>{{ solicitacao.servico.nome }}</h3>
+                <span class="status-badge status-{{ solicitacao.status }}">{{ solicitacao.get_status_display }}</span>
+            </div>
+            
+            <div class="solicitacao-info">
+                <p><strong>Organizador:</strong> {{ solicitacao.organizador.user.get_full_name|default:solicitacao.organizador.user.username }}</p>
+                <p><strong>Evento:</strong> {{ solicitacao.evento.nomeEvento }}</p>
+                <p><strong>Data do Evento:</strong> {{ solicitacao.evento.dataEvento|date:"d/m/Y H:i" }}</p>
+                <p><strong>Local:</strong> {{ solicitacao.evento.localEvento }}</p>
+                {% if solicitacao.evento.previsao_participantes %}
+                <p><strong>Participantes:</strong> {{ solicitacao.evento.previsao_participantes }} pessoas</p>
+                {% endif %}
+                <p><strong>Itens Selecionados:</strong> {{ solicitacao.total_itens_selecionados }} item{{ solicitacao.total_itens_selecionados|pluralize:"s" }}</p>
+                <p><strong>Solicitado em:</strong> {{ solicitacao.data_solicitacao|date:"d/m/Y H:i" }}</p>
+            </div>
+            
+            <div class="solicitacao-actions">
+                <button class="btn btn-primary detalhes-btn" data-solicitacao-id="{{ solicitacao.id }}">
+                    👁️ Ver Detalhes
+                </button>
+                <a href="{% url 'chat_room' solicitacao.organizador.user.username %}" class="btn btn-secondary">
+                    💬 Conversar
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">💰</div>
+        <h3>Nenhuma solicitação encontrada</h3>
+        <p>Você ainda não recebeu nenhuma solicitação de orçamento.</p>
+        <a href="{% url 'meus_servicos' %}" class="btn btn-primary">Ver Meus Serviços</a>
+    </div>
+    {% endif %}
+
+    <div class="back-link">
+        <a href="{% url 'index' %}">← Voltar ao Início</a>
+    </div>
+</div>
+
+<div id="modalDetalhes" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Detalhes da Solicitação</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div id="modalDetalhesContent" class="modal-body">
+        </div>
+    </div>
+</div>
+
+<style>
+    .header-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .solicitacoes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .solicitacao-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .solicitacao-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .solicitacao-header h3 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .status-pendente { background-color: #fff3cd; color: #856404; }
+    .status-em_analise { background-color: #d1ecf1; color: #0c5460; }
+    .status-orcamento_enviado { background-color: #d4edda; color: #155724; }
+    .status-aceito { background-color: #d1e7dd; color: #0f5132; }
+    .status-recusado { background-color: #f8d7da; color: #721c24; }
+    .status-cancelado { background-color: #f5c6cb; color: #721c24; }
+    
+    .solicitacao-info p {
+        margin: 5px 0;
+        color: #666;
+    }
+    
+    .solicitacao-actions {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+    
+    .back-link {
+        text-align: center;
+        margin-top: 30px;
+    }
+    
+    .back-link a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .close:hover {
+        color: #000;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Event listeners para os botões de detalhes
+        document.querySelectorAll('.detalhes-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const solicitacaoId = this.getAttribute('data-solicitacao-id');
+                abrirModalDetalhes(solicitacaoId);
+            });
+        });
+        
+        // Event listener para o botão de fechar modal
+        document.querySelector('.close').addEventListener('click', fecharModalDetalhes);
+    });
+    
+    function abrirModalDetalhes(solicitacaoId) {
+        document.getElementById('modalDetalhes').style.display = 'block';
+        
+        fetch(`/servicos/detalhes-solicitacao/${solicitacaoId}/`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('modalDetalhesContent').innerHTML = html;
+                // Adicionar event listeners após carregar o conteúdo
+                setupModalEventListeners(solicitacaoId);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('modalDetalhesContent').innerHTML = '<p>Erro ao carregar detalhes.</p>';
+            });
+    }
+    
+    function setupModalEventListeners(solicitacaoId) {
+        // Event listeners para os botões de status
+        const statusButtons = document.querySelectorAll('.status-btn');
+        statusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const status = this.getAttribute('data-status');
+                atualizarStatus(status);
+            });
+        });
+    }
+    
+    function enviarMensagem() {
+        console.log('Função enviarMensagem chamada');
+        
+        const mensagem = document.getElementById('mensagem').value.trim();
+        if (!mensagem) {
+            alert('Por favor, digite uma mensagem.');
+            return;
+        }
+        
+        // Pegar o ID da solicitação do modal atual
+        const modalContent = document.getElementById('modalDetalhesContent');
+        const detalhesDiv = modalContent.querySelector('.detalhes-solicitacao');
+        const solicitacaoId = detalhesDiv.getAttribute('data-solicitacao-id');
+        
+        if (!solicitacaoId) {
+            alert('Erro: ID da solicitação não encontrado.');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('mensagem', mensagem);
+
+        console.log('Enviando mensagem:', mensagem);
+        console.log('Solicitação ID:', solicitacaoId);
+
+        fetch(`/servicos/adicionar-mensagem-orcamento/${solicitacaoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                alert('Mensagem enviada com sucesso!');
+                // Recarregar o conteúdo do modal
+                abrirModalDetalhes(solicitacaoId);
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar mensagem. Tente novamente.');
+        });
+    }
+    
+    function atualizarStatus(novoStatus) {
+        if (confirm('Tem certeza que deseja atualizar o status para "' + novoStatus + '"?')) {
+            //Pega o ID da solicitação do modal atual
+            const modalContent = document.getElementById('modalDetalhesContent');
+            const detalhesDiv = modalContent.querySelector('.detalhes-solicitacao');
+            const solicitacaoId = detalhesDiv.getAttribute('data-solicitacao-id');
+            
+            if (!solicitacaoId) {
+                alert('Erro: ID da solicitação não encontrado.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('status', novoStatus);
+            
+            fetch(`/servicos/atualizar-status-orcamento/${solicitacaoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // Recarregar o conteúdo do modal
+                    abrirModalDetalhes(solicitacaoId);
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar status. Tente novamente.');
+            });
+        }
+    }
+    
+    function atualizarValorOrcamento() {
+        console.log('Função atualizarValorOrcamento chamada');
+        
+        //Pega o ID da solicitação do modal atual
+        const modalContent = document.getElementById('modalDetalhesContent');
+        const detalhesDiv = modalContent.querySelector('.detalhes-solicitacao');
+        const solicitacaoId = detalhesDiv.getAttribute('data-solicitacao-id');
+        
+        if (!solicitacaoId) {
+            alert('Erro: ID da solicitação não encontrado.');
+            return;
+        }
+        
+        const valorInput = document.getElementById('valor_orcamento');
+        console.log('Valor input encontrado:', valorInput);
+        
+        const valor = valorInput.value.trim();
+        console.log('Valor digitado:', valor);
+        
+        if (!valor) {
+            alert('Por favor, informe o valor do orçamento.');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('valor_orcamento', valor);
+        
+        console.log('URL:', `/servicos/atualizar-valor-orcamento/${solicitacaoId}/`);
+        console.log('CSRF Token:', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch(`/servicos/atualizar-valor-orcamento/${solicitacaoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                alert(data.message);
+                // Recarregar o conteúdo do modal
+                abrirModalDetalhes(solicitacaoId);
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao atualizar valor do orçamento. Tente novamente.');
+        });
+    }
+    
+    function fecharModalDetalhes() {
+        document.getElementById('modalDetalhes').style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalDetalhes');
+        if (event.target == modal) {
+            fecharModalDetalhes();
+        }
+    }
+</script>
+{% endblock %} 

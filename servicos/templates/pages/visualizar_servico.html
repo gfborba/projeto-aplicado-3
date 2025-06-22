@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    {% csrf_token %}
     <div class="container">
         <div class="servico-header">
             <h1>{{ servico.nome }}</h1>
@@ -86,8 +87,85 @@
         </div>
         
         <div class="servico-actions">
-            <a href="{% url 'chat_room' servico.fornecedor.user.username %}" class="btn-primary">💬 Conversar com Fornecedor</a>
+            <button class="btn-primary" id="btnSolicitarOrcamento">💰 Solicitar Orçamento</button>
+            <a href="{% url 'chat_room' servico.fornecedor.user.username %}" class="btn-secondary">💬 Conversar com Fornecedor</a>
             <a href="{% url 'todos_servicos' %}" class="btn-secondary">← Voltar aos Serviços</a>
+        </div>
+    </div>
+
+    <div id="modalOrcamento" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Solicitar Orçamento</h2>
+                <span class="close">&times;</span>
+            </div>
+            
+            <div id="etapa1" class="modal-body">
+                <h3>Selecione um Evento</h3>
+                <p>Escolha o evento para o qual você deseja solicitar um orçamento:</p>
+                
+                <div id="lista-eventos" class="eventos-lista">
+                    {% for evento in eventos_organizador %}
+                    <div class="evento-item" 
+                         data-evento-id="{{ evento.id }}"
+                         data-evento-nome="{{ evento.nomeEvento|escapejs }}"
+                         data-evento-data="{{ evento.dataEvento|date:"d/m/Y H:i"|escapejs }}"
+                         data-evento-local="{{ evento.localEvento|escapejs }}"
+                         data-evento-participantes="{{ evento.previsao_participantes|default:0 }}"
+                         data-evento-endereco="{{ evento.endereco_completo|default:""|escapejs }}">
+                        <h4>{{ evento.nomeEvento }}</h4>
+                        <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Local:</strong> {{ evento.localEvento }}</p>
+                        {% if evento.previsao_participantes %}
+                        <p><strong>Participantes:</strong> {{ evento.previsao_participantes }} pessoas</p>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="sem-eventos">Você ainda não criou nenhum evento. <a href="{% url 'criar_evento' %}">Criar evento</a></p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="etapa2" class="modal-body" style="display: none;">
+                <h3>Detalhes do Orçamento</h3>
+                
+                <div class="evento-selecionado">
+                    <h4 id="nome-evento-selecionado"></h4>
+                    <p><strong>Data:</strong> <span id="data-evento-selecionado"></span></p>
+                    <p><strong>Local:</strong> <span id="local-evento-selecionado"></span></p>
+                    <p><strong>Participantes:</strong> <span id="participantes-evento-selecionado"></span></p>
+                    <p><strong>Endereço:</strong> <span id="endereco-evento-selecionado"></span></p>
+                </div>
+                
+                <div class="itens-selecao">
+                    <h4>Selecione os Itens de Interesse</h4>
+                    <div id="lista-itens-selecao">
+                        {% for item in servico.itens.all %}
+                        <div class="item-selecao">
+                            <label>
+                                <input type="checkbox" name="itens_selecionados" value="{{ item.id }}" class="item-checkbox">
+                                <strong>{{ item.nome }}</strong>
+                                {% if item.descricao %}
+                                <br><small>{{ item.descricao }}</small>
+                                {% endif %}
+                            </label>
+                        </div>
+                        {% empty %}
+                        <p>Este serviço não possui itens cadastrados.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="consideracoes">
+                    <h4>Considerações Adicionais</h4>
+                    <textarea id="consideracoes" placeholder="Descreva detalhes específicos, requisitos especiais, ou qualquer informação adicional que possa ajudar o fornecedor a preparar o orçamento..." rows="4"></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="btnVoltar">← Voltar</button>
+                    <button class="btn-primary" id="btnEnviarSolicitacao">Enviar Solicitação</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -127,4 +205,292 @@
         initMap();
     </script>
     {% endif %}
+
+    <script type="text/javascript">
+        let eventoSelecionado = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listener para o botão de abrir modal
+            document.getElementById('btnSolicitarOrcamento').addEventListener('click', abrirModalOrcamento);
+            
+            // Event listener para o botão de fechar modal
+            document.querySelector('.close').addEventListener('click', fecharModalOrcamento);
+            
+            // Event listener para o botão voltar
+            document.getElementById('btnVoltar').addEventListener('click', voltarEtapa1);
+            
+            // Event listener para o botão enviar solicitação
+            document.getElementById('btnEnviarSolicitacao').addEventListener('click', enviarSolicitacao);
+            
+            // Event listeners para os itens de evento
+            document.querySelectorAll('.evento-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.eventoId);
+                    const nome = this.dataset.eventoNome;
+                    const data = this.dataset.eventoData;
+                    const local = this.dataset.eventoLocal;
+                    const participantes = parseInt(this.dataset.eventoParticipantes);
+                    const endereco = this.dataset.eventoEndereco;
+                    
+                    selecionarEvento(id, nome, data, local, participantes, endereco);
+                });
+            });
+        });
+        
+        function abrirModalOrcamento() {
+            document.getElementById('modalOrcamento').style.display = 'block';
+        }
+        
+        function fecharModalOrcamento() {
+            document.getElementById('modalOrcamento').style.display = 'none';
+            document.getElementById('etapa1').style.display = 'block';
+            document.getElementById('etapa2').style.display = 'none';
+            eventoSelecionado = null;
+        }
+        
+        function selecionarEvento(id, nome, data, local, participantes, endereco) {
+            eventoSelecionado = {
+                id: id,
+                nome: nome,
+                data: data,
+                local: local,
+                participantes: participantes,
+                endereco: endereco
+            };
+            
+            document.getElementById('nome-evento-selecionado').textContent = nome;
+            document.getElementById('data-evento-selecionado').textContent = data;
+            document.getElementById('local-evento-selecionado').textContent = local;
+            document.getElementById('participantes-evento-selecionado').textContent = participantes > 0 ? participantes + ' pessoas' : 'Não informado';
+            document.getElementById('endereco-evento-selecionado').textContent = endereco || 'Não informado';
+            
+            document.getElementById('etapa1').style.display = 'none';
+            document.getElementById('etapa2').style.display = 'block';
+        }
+        
+        function voltarEtapa1() {
+            document.getElementById('etapa1').style.display = 'block';
+            document.getElementById('etapa2').style.display = 'none';
+            eventoSelecionado = null;
+        }
+        
+        function enviarSolicitacao() {
+            console.log('Função enviarSolicitacao chamada');
+            
+            if (!eventoSelecionado) {
+                alert('Por favor, selecione um evento.');
+                return;
+            }
+            
+            // Coletar itens selecionados
+            const itensSelecionados = [];
+            document.querySelectorAll('input[name="itens_selecionados"]:checked').forEach(checkbox => {
+                itensSelecionados.push(checkbox.value);
+            });
+            
+            const consideracoes = document.getElementById('consideracoes').value;
+            
+            //Enviando os dados para o backend
+            const dados = {
+                evento_id: eventoSelecionado.id,
+                servico_id: parseInt("{{ servico.id }}"),
+                itens_selecionados: itensSelecionados,
+                consideracoes: consideracoes
+            };
+            
+            console.log('Dados a serem enviados:', dados);
+            console.log('CSRF Token:', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            fetch('{% url "solicitar_orcamento" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert('Solicitação de orçamento enviada com sucesso!');
+                    fecharModalOrcamento();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar solicitação. Tente novamente.');
+            });
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalOrcamento');
+            if (event.target == modal) {
+                fecharModalOrcamento();
+            }
+        }
+    </script>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .eventos-lista {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .evento-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .evento-item:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .evento-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .evento-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+        
+        .sem-eventos {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .evento-selecionado {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .evento-selecionado h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .itens-selecao {
+            margin-bottom: 20px;
+        }
+        
+        .item-selecao {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .item-selecao label {
+            display: block;
+            cursor: pointer;
+        }
+        
+        .item-selecao input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        .consideracoes textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn-primary, .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
 {% endblock %}
