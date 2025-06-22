@@ -12,6 +12,7 @@ class Evento(models.Model):
     endereco_completo = models.TextField(verbose_name='Endereço Completo', null=True, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name='Latitude', null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name='Longitude', null=True, blank=True)
+    previsao_participantes = models.PositiveIntegerField(verbose_name='Previsão de Participantes', null=True, blank=True)
     
     class Meta:
         verbose_name = 'Evento'

@@ -51,6 +51,17 @@
                 </div>
                 
                 <div class="mb-3">
+                    <label for="{{ form.previsao_participantes.id_for_label }}" class="form-label">Previsão de Participantes</label>
+                    {{ form.previsao_participantes }}
+                    <small class="form-text text-muted">Número estimado de pessoas que participarão do evento</small>
+                    {% if form.previsao_participantes.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.previsao_participantes.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
                     <label for="{{ form.descricaoEvento.id_for_label }}" class="form-label">Descrição</label>
                     {{ form.descricaoEvento }}
                     {% if form.descricaoEvento.errors %}
