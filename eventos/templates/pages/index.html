@@ -3,25 +3,63 @@
 {% block content %}
 <div class="container">
     <h1>Bem-vindo ao Sistema de Eventos</h1>
-    
+
     <div class="welcome-content">
         <p>Plataforma para conectar organizadores de eventos e fornecedores de serviços.</p>
-        
+
         {% if is_fornecedor %}
-            <div class="fornecedor-actions">
-                <h2>Área do Fornecedor</h2>
-                <p>Gerencie seus serviços e conecte-se com organizadores de eventos.</p>
-                <a href="{% url 'meus_servicos' %}" class="btn-primary">Meus Serviços</a>
+        <div class="fornecedor-actions">
+            <h2>Área do Fornecedor</h2>
+            <p>Gerencie seus serviços e conecte-se com organizadores de eventos.</p>
+            <a href="{% url 'meus_servicos' %}" class="btn btn-primary">Meus Serviços</a>
+
+            <h3 class="mt-4">Todos os Eventos Disponíveis</h3>
+            {% if eventos %}
+            <div class="list-group">
+                {% for evento in eventos %}
+                <div class="list-group-item">
+                    <h5>{{ evento.nomeEvento }}</h5>
+                    <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Local:</strong> {{ evento.localEvento }}</p>
+                    <p>{{ evento.descricaoEvento }}</p>
+                    <p><small>Organizador: {{ evento.idUsuario.user.get_full_name }}</small></p>
+                </div>
+                {% endfor %}
             </div>
+            {% else %}
+            <p>Não há eventos cadastrados no momento.</p>
+            {% endif %}
+        </div>
         {% endif %}
-        
+
         {% if is_organizador %}
-            <div class="organizador-actions">
-                <h2>Área do Organizador</h2>
-                <p>Encontre fornecedores e organize seus eventos.</p>
-                <a href="{% url 'todos_servicos' %}" class="btn-primary">Ver Todos os Serviços</a>
+        <div class="organizador-actions">
+            <h2>Área do Organizador</h2>
+            <p>Encontre fornecedores e organize seus eventos.</p>
+            <a href="{% url 'criar_evento' %}" class="btn btn-success">Criar Novo Evento</a>
+            <a href="{% url 'todos_servicos' %}" class="btn btn-primary">Ver Todos os Serviços</a>
+
+            <h3 class="mt-4">Meus Eventos</h3>
+            {% if eventos %}
+            <div class="list-group">
+                {% for evento in eventos %}
+                <div class="list-group-item">
+                    <h5>{{ evento.nomeEvento }}</h5>
+                    <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Local:</strong> {{ evento.localEvento }}</p>
+                    <p>{{ evento.descricaoEvento }}</p>
+                    <div class="mt-2">
+                        <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-primary">Editar</a>
+                        <a href="{% url 'excluir_evento' evento.id %}" class="btn btn-sm btn-danger">Excluir</a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
+            {% else %}
+            <p>Você ainda não criou nenhum evento.</p>
+            {% endif %}
+        </div>
         {% endif %}
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
