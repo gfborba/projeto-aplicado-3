@@ -1,5 +1,5 @@
 from django import forms
-from .models import Evento, Pergunta, Resposta
+from .models import Evento, Pergunta, Resposta, AvaliacaoFornecedor
 
 class EventoForm(forms.ModelForm):
     class Meta:
@@ -69,3 +69,22 @@ class RespostaForm(forms.ModelForm):
         labels = {
             'texto': ''
         }
+        
+class AvaliacaoFornecedorForm(forms.ModelForm):
+    class Meta:
+        model = AvaliacaoFornecedor
+        fields = ['nota', 'comentario']
+        widgets = {
+            'nota': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+            'comentario': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Deixe um comentário opcional...'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nota'].widget.choices = AvaliacaoFornecedor.NOTA_CHOICES
