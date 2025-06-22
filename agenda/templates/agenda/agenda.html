@@ -351,7 +351,7 @@
             weekends: true,
             
             // Carregar eventos
-            events: '/agenda/eventos/',
+            events: '/agenda/compromissos/',
             
             // Selecionar data/hora
             select: function(arg) {
@@ -429,7 +429,7 @@
             allDay: document.getElementById('todo_dia').checked
         };
         
-        const url = eventoAtual ? `/agenda/evento/${eventoAtual}/atualizar/` : '/agenda/evento/criar/';
+        const url = eventoAtual ? `/agenda/compromisso/${eventoAtual}/atualizar/` : '/agenda/compromisso/criar/';
         const method = eventoAtual ? 'POST' : 'POST';
         
         fetch(url, {
@@ -457,7 +457,7 @@
     }
     
     function carregarDetalhesEvento(eventoId) {
-        fetch(`/agenda/evento/${eventoId}/detalhes/`)
+        fetch(`/agenda/compromisso/${eventoId}/detalhes/`)
         .then(response => response.json())
         .then(data => {
             eventoAtual = eventoId;
@@ -494,7 +494,7 @@
     function editarEvento() {
         if (!eventoAtual) return;
         
-        fetch(`/agenda/evento/${eventoAtual}/detalhes/`)
+        fetch(`/agenda/compromisso/${eventoAtual}/detalhes/`)
         .then(response => response.json())
         .then(data => {
             document.getElementById('titulo').value = data.title;
@@ -520,7 +520,7 @@
         if (!eventoAtual) return;
         
         if (confirm('Tem certeza que deseja excluir este evento?')) {
-            fetch(`/agenda/evento/${eventoAtual}/deletar/`, {
+            fetch(`/agenda/compromisso/${eventoAtual}/deletar/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -549,7 +549,7 @@
             end: event.end ? event.end.toISOString() : null
         };
         
-        fetch(`/agenda/evento/${event.id}/atualizar/`, {
+        fetch(`/agenda/compromisso/${event.id}/atualizar/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

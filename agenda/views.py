@@ -65,7 +65,7 @@ def eventos_json(request):
     return JsonResponse(eventos_data, safe=False)
 
 @login_required
-def criar_evento(request):
+def criar_compromisso(request):
     #Cria um novo evento via AJAX
     if request.method != 'POST':
         return JsonResponse({'error': 'Método não permitido'}, status=405)
@@ -126,7 +126,7 @@ def criar_evento(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
-def atualizar_evento(request, evento_id):
+def atualizar_compromisso(request, evento_id):
     #Atualiza um evento existente via AJAX"""
     if request.method != 'POST':
         return JsonResponse({'error': 'Método não permitido'}, status=405)
@@ -179,7 +179,7 @@ def atualizar_evento(request, evento_id):
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
-def deletar_evento(request, evento_id):
+def deletar_compromisso(request, evento_id):
     """Deleta um evento via AJAX"""
     if request.method != 'POST':
         return JsonResponse({'error': 'Método não permitido'}, status=405)
@@ -203,7 +203,7 @@ def deletar_evento(request, evento_id):
     return JsonResponse({'success': True})
 
 @login_required
-def detalhes_evento(request, evento_id):
+def detalhes_compromisso(request, evento_id):
     """Retorna detalhes de um evento específico"""
     evento = get_object_or_404(EventoAgenda, id=evento_id)
     

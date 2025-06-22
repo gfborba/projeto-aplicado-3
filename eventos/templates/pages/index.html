@@ -278,10 +278,11 @@
             weekends: true,
             
             // Carregar eventos
-            events: '/agenda/eventos/',
+            events: '/agenda/compromissos/',
             
             // Clicar em evento
             eventClick: function(arg) {
+                // Redirecionar para a agenda completa em vez de tentar abrir detalhes
                 window.location.href = '/agenda/';
             },
             
@@ -301,7 +302,7 @@
         const upcomingEventsEl = document.getElementById('upcoming-events');
         if (!upcomingEventsEl) return;
         
-        fetch('/agenda/eventos-miniatura/')
+        fetch('/agenda/compromissos-miniatura/')
         .then(response => response.json())
         .then(data => {
             if (data.length === 0) {
@@ -322,6 +323,13 @@
                     </div>
                 `;
             });
+            
+            // Adicionar link para a agenda completa
+            html += `
+                <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                    <a href="{% url 'agenda' %}" class="btn btn-sm btn-outline-primary">Ver Agenda Completa</a>
+                </div>
+            `;
             
             upcomingEventsEl.innerHTML = html;
         })
