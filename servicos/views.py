@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
+from django.conf import settings
 from .models import Servico, Item, ImagemServico
 from usuarios.models import Fornecedor, Organizador
+from usuarios.utils import verificar_cobertura_fornecedor
 import json
 import unicodedata
 
@@ -56,6 +58,29 @@ def todos_servicos(request):
                     break
         servicos = servicos_filtrados
     
+    #PRIMEIRO FILTRO OBRIGATÓRIO: Verificar se o fornecedor atende o organizador baseado no raio de cobertura
+    servicos_filtrados = []
+    for servico in servicos:
+        atende, distancia = verificar_cobertura_fornecedor(servico.fornecedor, organizador)
+        if atende:
+            servico.distancia_km = distancia  #Adicionar distância ao objeto para usar no template
+            servicos_filtrados.append(servico)
+    servicos = servicos_filtrados
+    
+    #SEGUNDO FILTRO OPCIONAL: Filtro por distância máxima do organizador (complementar)
+    distancia_maxima = request.GET.get('distancia_maxima', '').strip()
+    if distancia_maxima:
+        try:
+            distancia_maxima = float(distancia_maxima)
+            servicos_filtrados = []
+            for servico in servicos:
+                if servico.distancia_km is not None and servico.distancia_km <= distancia_maxima:
+                    servicos_filtrados.append(servico)
+            servicos = servicos_filtrados
+        except ValueError:
+            #Se o valor não for válido, não aplicar filtro
+            pass
+    
     #Obter categorias disponíveis para o filtro
     categorias_disponiveis = Fornecedor.CATEGORIA_CHOICES
     
@@ -64,7 +89,8 @@ def todos_servicos(request):
         'organizador': organizador,
         'categorias_disponiveis': categorias_disponiveis,
         'categoria_atual': categoria,
-        'tag_atual': tag_busca
+        'tag_atual': tag_busca,
+        'distancia_maxima': distancia_maxima
     })
 
 @login_required
@@ -86,7 +112,8 @@ def visualizar_servico(request, servico_id):
     
     return render(request, 'pages/visualizar_servico.html', {
         'servico': servico,
-        'organizador': organizador
+        'organizador': organizador,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
     })
 
 @login_required
@@ -155,7 +182,8 @@ def detalhes_servico(request, servico_id):
     
     return render(request, 'pages/detalhes_servico.html', {
         'servico': servico,
-        'fornecedor': fornecedor
+        'fornecedor': fornecedor,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
     })
 
 @login_required

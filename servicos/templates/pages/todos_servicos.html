@@ -22,6 +22,14 @@
                     <input type="text" name="tag" id="tag" placeholder="Digite uma tag..." value="{{ tag_atual }}">
                 </div>
                 
+                <div class="filtro-grupo">
+                    <label for="distancia_maxima">Distância máxima (km):</label>
+                    <input type="number" name="distancia_maxima" id="distancia_maxima" 
+                           placeholder="Ex: 20" value="{{ distancia_maxima }}" 
+                           min="0.1" max="1000" step="0.1">
+                    <small class="help-text">Filtre por distância</small>
+                </div>
+                
                 <button type="submit" class="btn-filtrar">Filtrar</button>
                 <a href="{% url 'todos_servicos' %}" class="btn-limpar">Limpar Filtros</a>
             </form>
@@ -29,7 +37,7 @@
         
         <div class="resultados-info">
             {% if servicos %}
-                {% if categoria_atual != 'todas' or tag_atual %}
+                {% if categoria_atual != 'todas' or tag_atual or distancia_maxima %}
                     <p>Mostrando {{ servicos|length }} serviço{{ servicos|length|pluralize:"s" }} encontrado{{ servicos|length|pluralize:"s" }}
                     {% if categoria_atual != 'todas' %}
                         na categoria "{{ categoria_atual|title }}"
@@ -37,10 +45,15 @@
                     {% if tag_atual %}
                         {% if categoria_atual != 'todas' %} e {% else %} com {% endif %}tag "{{ tag_atual }}"
                     {% endif %}
+                    {% if distancia_maxima %}
+                        {% if categoria_atual != 'todas' or tag_atual %} e {% else %} com {% endif %}distância máxima de {{ distancia_maxima }} km
+                    {% endif %}
                     </p>
                 {% else %}
                     <p>Mostrando todos os {{ servicos|length }} serviço{{ servicos|length|pluralize:"s" }} disponível{{ servicos|length|pluralize:"s" }}</p>
                 {% endif %}
+            {% else %}
+                <p>Nenhum serviço encontrado com os filtros aplicados.</p>
             {% endif %}
         </div>
         
@@ -59,6 +72,14 @@
                         <div class="fornecedor-info">
                             <p><strong>Fornecedor:</strong> {{ servico.fornecedor.user.get_full_name|default:servico.fornecedor.user.username }}</p>
                             <p><strong>Categoria:</strong> {{ servico.fornecedor.get_categoria_display }}</p>
+                            {% if servico.distancia_km %}
+                                <p><strong>Distância:</strong> {{ servico.distancia_km|floatformat:1 }} km</p>
+                            {% endif %}
+                            {% if not servico.fornecedor.tem_cobertura_ilimitada %}
+                                <p><strong>Raio de cobertura:</strong> {{ servico.fornecedor.raio_cobertura }} km</p>
+                            {% else %}
+                                <p><strong>Raio de cobertura:</strong> Ilimitado</p>
+                            {% endif %}
                         </div>
                         
                         {% if servico.tags %}
@@ -123,4 +144,5 @@
             }
         });
     </script>
+
 {% endblock %}

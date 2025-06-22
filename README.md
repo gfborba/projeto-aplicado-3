@@ -12,7 +12,7 @@ Sistema de gerenciamento de eventos desenvolvido em Django.
 
 1. **Clone o repositório**
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/gfborba/projeto-aplicado-3
 cd projeto-aplicado-3
 ```
 
