@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from .models import Servico, Item, ImagemServico
 from usuarios.models import Fornecedor, Organizador
+from usuarios.utils import verificar_cobertura_fornecedor
 import json
 import unicodedata
 
@@ -56,6 +57,29 @@ def todos_servicos(request):
                     break
         servicos = servicos_filtrados
     
+    #PRIMEIRO FILTRO OBRIGATÓRIO: Verificar se o fornecedor atende o organizador baseado no raio de cobertura
+    servicos_filtrados = []
+    for servico in servicos:
+        atende, distancia = verificar_cobertura_fornecedor(servico.fornecedor, organizador)
+        if atende:
+            servico.distancia_km = distancia  #Adicionar distância ao objeto para usar no template
+            servicos_filtrados.append(servico)
+    servicos = servicos_filtrados
+    
+    #SEGUNDO FILTRO OPCIONAL: Filtro por distância máxima do organizador (complementar)
+    distancia_maxima = request.GET.get('distancia_maxima', '').strip()
+    if distancia_maxima:
+        try:
+            distancia_maxima = float(distancia_maxima)
+            servicos_filtrados = []
+            for servico in servicos:
+                if servico.distancia_km is not None and servico.distancia_km <= distancia_maxima:
+                    servicos_filtrados.append(servico)
+            servicos = servicos_filtrados
+        except ValueError:
+            #Se o valor não for válido, não aplicar filtro
+            pass
+    
     #Obter categorias disponíveis para o filtro
     categorias_disponiveis = Fornecedor.CATEGORIA_CHOICES
     
@@ -64,7 +88,8 @@ def todos_servicos(request):
         'organizador': organizador,
         'categorias_disponiveis': categorias_disponiveis,
         'categoria_atual': categoria,
-        'tag_atual': tag_busca
+        'tag_atual': tag_busca,
+        'distancia_maxima': distancia_maxima
     })
 
 @login_required

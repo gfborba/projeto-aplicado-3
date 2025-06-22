@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as login_django
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.contrib import messages
 from .models import Organizador, Fornecedor
 from .utils import atualizar_coordenadas_usuario
 import json
@@ -92,6 +93,7 @@ def cadastro_organizador(request):
         try:
             atualizar_coordenadas_usuario(organizador)
         except Exception as e:
+            #Se falhar, não impede o cadastro
             print(f"Erro ao geocodificar CEP: {e}")
         
         return render(request, 'pages/login.html')
@@ -141,14 +143,55 @@ def cadastro_fornecedor(request):
         )
         fornecedor.save()
         
-        # Tentar geocodificar o CEP
+        #Tentar geocodificar o CEP
         try:
             atualizar_coordenadas_usuario(fornecedor)
         except Exception as e:
+            #Se falhar, não impede o cadastro
             print(f"Erro ao geocodificar CEP: {e}")
 
         return render(request, 'pages/login.html')
+
+@login_required
+def configurar_raio_cobertura(request):
+    #Permite que fornecedores configurem seu raio de cobertura
+    try:
+        fornecedor = Fornecedor.objects.get(user=request.user)
+    except Fornecedor.DoesNotExist:
+        messages.error(request, 'Acesso restrito apenas para fornecedores.')
+        return redirect('index')
     
+    if request.method == 'GET':
+        return render(request, 'pages/configurar_raio_cobertura.html', {
+            'fornecedor': fornecedor
+        })
+    else:
+        tipo_raio = request.POST.get('tipo_raio')
+        
+        #Definir o valor baseado no tipo selecionado
+        if tipo_raio == 'ilimitado':
+            fornecedor.raio_cobertura = 0
+            fornecedor.save()
+            messages.success(request, 'Raio de cobertura configurado como ilimitado.')
+        else:
+            raio_cobertura = request.POST.get('raio_cobertura')
+            try:
+                raio_cobertura = int(raio_cobertura)
+                if raio_cobertura < 1 or raio_cobertura > 1000:
+                    raise ValueError("Raio deve estar entre 1 e 1000 km")
+                
+                fornecedor.raio_cobertura = raio_cobertura
+                fornecedor.save()
+                messages.success(request, f'Raio de cobertura configurado para {raio_cobertura} km.')
+                
+            except (ValueError, TypeError):
+                messages.error(request, 'Raio de cobertura deve ser um número válido entre 1 e 1000 km.')
+                return render(request, 'pages/configurar_raio_cobertura.html', {
+                    'fornecedor': fornecedor
+                })
+        
+        return redirect('index')
+
 #-------------------------LOGIN-------------------------
 
 def login(request):

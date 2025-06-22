@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Raio de Cobertura</title>
+ 
+</head>
+<body>
+    <div class="container">
+        <div class="config-card">
+            <h1>Configurar Raio de Cobertura</h1>
+            
+            <div class="current-config">
+                <h4>Configuração Atual</h4>
+                {% if fornecedor.tem_cobertura_ilimitada %}
+                    <p><strong>Raio de cobertura:</strong> Ilimitado</p>
+                {% else %}
+                    <p><strong>Raio de cobertura:</strong> {{ fornecedor.raio_cobertura }} km</p>
+                {% endif %}
+                <p><strong>Localização:</strong> {{ fornecedor.endereco_completo }}</p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Como funciona o raio de cobertura?</h3>
+                <p>• <strong>Raio limitado:</strong> Seus serviços só aparecerão para organizadores dentro da distância especificada</p>
+                <p>• <strong>Raio ilimitado:</strong> Seus serviços aparecerão para todos os organizadores, independente da distância</p>
+                <p>• <strong>Distância calculada:</strong> Baseada na distância entre os CEPs dos usuários</p>
+            </div>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>Escolha o tipo de cobertura:</label>
+                    
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="raio_limitado" name="tipo_raio" value="limitado" {% if not fornecedor.tem_cobertura_ilimitada %}checked{% endif %}>
+                            <label for="raio_limitado">
+                                <strong>Raio limitado</strong>
+                                <div class="option-description">Definir uma distância máxima em quilômetros</div>
+                            </label>
+                        </div>
+                        
+                        <div class="radio-option">
+                            <input type="radio" id="raio_ilimitado" name="tipo_raio" value="ilimitado" {% if fornecedor.tem_cobertura_ilimitada %}checked{% endif %}>
+                            <label for="raio_ilimitado">
+                                <strong>Raio ilimitado</strong>
+                                <div class="option-description">Atender organizadores de qualquer distância</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="raio_input_group">
+                    <label for="raio_cobertura">Raio de cobertura (em quilômetros):</label>
+                    <input type="number" id="raio_cobertura" name="raio_cobertura" 
+                           value="{% if not fornecedor.tem_cobertura_ilimitada %}{{ fornecedor.raio_cobertura }}{% else %}50{% endif %}" 
+                           min="1" max="1000">
+                    <div class="help-text">Digite um valor entre 1 e 1000 km</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Salvar Configuração</button>
+                    <a href="{% url 'index' %}" class="btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar/ocultar campo de raio baseado na seleção
+        document.addEventListener('DOMContentLoaded', function() {
+            const raioLimitado = document.getElementById('raio_limitado');
+            const raioIlimitado = document.getElementById('raio_ilimitado');
+            const raioInputGroup = document.getElementById('raio_input_group');
+            const raioInput = document.getElementById('raio_cobertura');
+            
+            function toggleRaioInput() {
+                if (raioIlimitado.checked) {
+                    raioInputGroup.style.display = 'none';
+                } else {
+                    raioInputGroup.style.display = 'block';
+                }
+            }
+            
+            raioLimitado.addEventListener('change', toggleRaioInput);
+            raioIlimitado.addEventListener('change', toggleRaioInput);
+            
+            // Executar na carga inicial
+            toggleRaioInput();
+        });
+    </script>
+</body>
+</html> 

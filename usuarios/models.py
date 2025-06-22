@@ -51,6 +51,10 @@ class Fornecedor(models.Model):
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='outros')
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    raio_cobertura = models.PositiveIntegerField(
+        default=50, 
+        help_text="Raio de cobertura em quilômetros (0 = sem limite)"
+    )
     
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.get_categoria_display()}"
@@ -63,3 +67,7 @@ class Fornecedor(models.Model):
             endereco += f" - {self.complemento}"
         endereco += f", {self.bairro}, {self.cidade}/{self.estado} - CEP: {self.cep}"
         return endereco
+    
+    def tem_cobertura_ilimitada(self):
+        #Verifica se o fornecedor tem cobertura ilimitada
+        return self.raio_cobertura == 0
