@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
+from django.conf import settings
 from .models import Servico, Item, ImagemServico
 from usuarios.models import Fornecedor, Organizador
 from usuarios.utils import verificar_cobertura_fornecedor
@@ -111,7 +112,8 @@ def visualizar_servico(request, servico_id):
     
     return render(request, 'pages/visualizar_servico.html', {
         'servico': servico,
-        'organizador': organizador
+        'organizador': organizador,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
     })
 
 @login_required
@@ -180,7 +182,8 @@ def detalhes_servico(request, servico_id):
     
     return render(request, 'pages/detalhes_servico.html', {
         'servico': servico,
-        'fornecedor': fornecedor
+        'fornecedor': fornecedor,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
     })
 
 @login_required
