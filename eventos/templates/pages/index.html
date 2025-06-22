@@ -14,6 +14,17 @@
             <a href="{% url 'meus_servicos' %}" class="btn btn-primary">Meus Serviços</a>
             <a href="{% url 'configurar_raio_cobertura' %}" class="btn-secondary">⚙️ Configurar Raio de Cobertura</a>
             <a href="{% url 'minhas_solicitacoes_fornecedor' %}" class="btn btn-info">💰 Minhas Solicitações de Orçamento</a>
+            <a href="{% url 'agenda' %}" class="btn btn-warning">📅 Minha Agenda</a>
+            
+            <!-- Calendário em Miniatura -->
+            <div class="calendar-miniature">
+                <h3>📅 Próximos Eventos</h3>
+                <div id="calendar-mini" class="calendar-mini-container"></div>
+                <div id="upcoming-events" class="upcoming-events">
+                    <p class="loading">Carregando eventos...</p>
+                </div>
+            </div>
+            
             <h3 class="mt-4">Todos os Eventos Disponíveis</h3>
             {% if eventos %}
             <div class="list-group">
@@ -49,7 +60,17 @@
             <a href="{% url 'criar_evento' %}" class="btn btn-success">Criar Novo Evento</a>
             <a href="{% url 'todos_servicos' %}" class="btn btn-primary">Ver Todos os Serviços</a>
             <a href="{% url 'minhas_solicitacoes_organizador' %}" class="btn btn-info">💰 Minhas Solicitações de Orçamento</a>
-
+            <a href="{% url 'agenda' %}" class="btn btn-warning">📅 Minha Agenda</a>
+            
+            <!-- Calendário em Miniatura -->
+            <div class="calendar-miniature">
+                <h3>📅 Próximos Eventos</h3>
+                <div id="calendar-mini" class="calendar-mini-container"></div>
+                <div id="upcoming-events" class="upcoming-events">
+                    <p class="loading">Carregando eventos...</p>
+                </div>
+            </div>
+            
             <h3 class="mt-4">Meus Eventos</h3>
             {% if eventos %}
             <div class="list-group">
@@ -85,4 +106,205 @@
         {% endif %}
     </div>
 </div>
+
+<style>
+    .calendar-miniature {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .calendar-miniature h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+    
+    .calendar-mini-container {
+        height: 300px;
+        margin-bottom: 15px;
+    }
+    
+    .upcoming-events {
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+    }
+    
+    .upcoming-events .loading {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+    }
+    
+    .event-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .event-item:last-child {
+        border-bottom: none;
+    }
+    
+    .event-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    
+    .event-info {
+        flex: 1;
+    }
+    
+    .event-title {
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    .event-date {
+        color: #666;
+        font-size: 12px;
+        margin: 0;
+    }
+    
+    .event-type {
+        background: #f8f9fa;
+        color: #666;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 10px;
+        margin-left: 10px;
+    }
+    
+    .no-events {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+    }
+    
+    /* Estilos do FullCalendar em miniatura */
+    .fc-mini {
+        font-size: 12px;
+    }
+    
+    .fc-mini .fc-toolbar-title {
+        font-size: 14px !important;
+    }
+    
+    .fc-mini .fc-button {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+    }
+    
+    .fc-mini .fc-event {
+        font-size: 10px !important;
+        padding: 1px 2px !important;
+    }
+    
+    .fc-mini .fc-daygrid-day-number {
+        font-size: 11px !important;
+    }
+    
+    .fc-mini .fc-col-header-cell {
+        font-size: 10px !important;
+    }
+</style>
+
+<!-- FullCalendar CDN para miniatura -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar calendário em miniatura
+        inicializarCalendarioMiniatura();
+        
+        // Carregar próximos eventos
+        carregarProximosEventos();
+    });
+    
+    function inicializarCalendarioMiniatura() {
+        const calendarEl = document.getElementById('calendar-mini');
+        if (!calendarEl) return;
+        
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pt-br',
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: 'today'
+            },
+            buttonText: {
+                today: 'Hoje'
+            },
+            height: 250,
+            editable: false,
+            selectable: false,
+            dayMaxEvents: 2,
+            weekends: true,
+            
+            // Carregar eventos
+            events: '/agenda/eventos/',
+            
+            // Clicar em evento
+            eventClick: function(arg) {
+                window.location.href = '/agenda/';
+            },
+            
+            // Clicar em data
+            dateClick: function(arg) {
+                window.location.href = '/agenda/';
+            }
+        });
+        
+        calendar.render();
+        
+        // Adicionar classe para estilos específicos
+        calendarEl.classList.add('fc-mini');
+    }
+    
+    function carregarProximosEventos() {
+        const upcomingEventsEl = document.getElementById('upcoming-events');
+        if (!upcomingEventsEl) return;
+        
+        fetch('/agenda/eventos-miniatura/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                upcomingEventsEl.innerHTML = '<p class="no-events">Nenhum evento agendado para os próximos dias.</p>';
+                return;
+            }
+            
+            let html = '';
+            data.forEach(evento => {
+                html += `
+                    <div class="event-item">
+                        <div class="event-color" style="background-color: ${evento.cor}"></div>
+                        <div class="event-info">
+                            <p class="event-title">${evento.titulo}</p>
+                            <p class="event-date">${evento.data_inicio}</p>
+                        </div>
+                        <span class="event-type">${evento.tipo}</span>
+                    </div>
+                `;
+            });
+            
+            upcomingEventsEl.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Erro ao carregar eventos:', error);
+            upcomingEventsEl.innerHTML = '<p class="no-events">Erro ao carregar eventos.</p>';
+        });
+    }
+</script>
 {% endblock %}
