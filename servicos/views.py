@@ -9,6 +9,7 @@ from usuarios.models import Fornecedor, Organizador
 from usuarios.utils import verificar_cobertura_fornecedor
 import json
 import unicodedata
+from django.utils.translation import gettext as _
 
 @login_required
 def meus_servicos(request):
@@ -534,4 +535,74 @@ def adicionar_mensagem_orcamento(request, solicitacao_id):
     return JsonResponse({
         'success': True,
         'message': 'Mensagem adicionada com sucesso!'
+    })
+
+@login_required
+def atualizar_status_orcamento(request, solicitacao_id):
+    #Atualiza o status de uma solicitação de orçamento
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método não permitido'})
+    
+    solicitacao = get_object_or_404(SolicitacaoOrcamento, id=solicitacao_id)
+    novo_status = request.POST.get('status', '').strip()
+    
+    if not novo_status:
+        return JsonResponse({'success': False, 'error': 'Status não informado'})
+    
+    #Verifica permissão e determinar tipo de usuário
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+        if solicitacao.organizador != organizador:
+            return JsonResponse({'success': False, 'error': 'Permissão negada'})
+        tipo_usuario = 'organizador'
+    except Organizador.DoesNotExist:
+        try:
+            fornecedor = Fornecedor.objects.get(user=request.user)
+            if solicitacao.fornecedor != fornecedor:
+                return JsonResponse({'success': False, 'error': 'Permissão negada'})
+            tipo_usuario = 'fornecedor'
+        except Fornecedor.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Acesso negado'})
+    
+    #Valida status permitido para cada tipo de usuário
+    status_permitidos = {
+        'fornecedor': ['em_analise', 'orcamento_enviado', 'recusado'],
+        'organizador': ['aceito', 'recusado', 'em_revisao']
+    }
+    
+    if novo_status not in status_permitidos[tipo_usuario]:
+        return JsonResponse({'success': False, 'error': 'Status não permitido para este usuário'})
+    
+    #Verifica se o organizador pode alterar o status
+    if tipo_usuario == 'organizador':
+        #Verifica se o fornecedor já alterou o status pelo menos uma vez
+        historico_fornecedor = solicitacao.historico.filter(tipo_usuario='fornecedor').exists()
+        if not historico_fornecedor and solicitacao.status == 'pendente':
+            return JsonResponse({
+                'success': False, 
+                'error': 'Você só pode alterar o status após o fornecedor ter respondido'
+            })
+    
+    #Atualizar status
+    status_anterior = solicitacao.status
+    solicitacao.status = novo_status
+    solicitacao.save()
+    
+    # Criar mensagem no histórico sobre a mudança de status
+    status_choices = dict(SolicitacaoOrcamento.STATUS_CHOICES)
+    status_anterior_display = status_choices.get(status_anterior, status_anterior)
+    status_novo_display = status_choices.get(novo_status, novo_status)
+    
+    mensagem_status = f"Status alterado de '{status_anterior_display}' para '{status_novo_display}'"
+    HistoricoOrcamento.objects.create(
+        solicitacao=solicitacao,
+        tipo_usuario=tipo_usuario,
+        mensagem=mensagem_status
+    )
+    
+    return JsonResponse({
+        'success': True,
+        'message': f'Status atualizado para "{solicitacao.get_status_display()}"',
+        'novo_status': novo_status,
+        'status_display': solicitacao.get_status_display()
     })

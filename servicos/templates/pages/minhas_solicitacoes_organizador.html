@@ -310,8 +310,40 @@
     
     function atualizarStatus(novoStatus) {
         if (confirm('Tem certeza que deseja atualizar o status para "' + novoStatus + '"?')) {
-            // TODO: Implementar atualização de status
-            alert('Funcionalidade de atualização de status será implementada em breve.');
+            //Pega o ID da solicitação do modal atual
+            const modalContent = document.getElementById('modalDetalhesContent');
+            const detalhesDiv = modalContent.querySelector('.detalhes-solicitacao');
+            const solicitacaoId = detalhesDiv.getAttribute('data-solicitacao-id');
+            
+            if (!solicitacaoId) {
+                alert('Erro: ID da solicitação não encontrado.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('status', novoStatus);
+            
+            fetch(`/servicos/atualizar-status-orcamento/${solicitacaoId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // Recarregar o conteúdo do modal
+                    abrirModalDetalhes(solicitacaoId);
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar status. Tente novamente.');
+            });
         }
     }
     

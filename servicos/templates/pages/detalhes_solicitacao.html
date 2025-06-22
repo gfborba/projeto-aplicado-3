@@ -99,9 +99,24 @@
             <div class="status-buttons">
                 <button class="btn btn-warning status-btn" data-status="em_analise">Em Análise</button>
                 <button class="btn btn-success status-btn" data-status="orcamento_enviado">Orçamento Enviado</button>
-                <button class="btn btn-info status-btn" data-status="aceito">Aceito</button>
                 <button class="btn btn-danger status-btn" data-status="recusado">Recusado</button>
             </div>
+        </div>
+        {% endif %}
+        
+        {% if tipo_usuario == 'organizador' %}
+        <div class="status-actions">
+            <h3>Atualizar Status</h3>
+            <div class="status-buttons">
+                <button class="btn btn-success status-btn" data-status="aceito">Aceito</button>
+                <button class="btn btn-danger status-btn" data-status="recusado">Recusado</button>
+                <button class="btn btn-info status-btn" data-status="em_revisao">Em Revisão</button>
+            </div>
+            <small class="status-note">
+                {% if solicitacao.status == 'pendente' %}
+                <em>Você só pode alterar o status após o fornecedor ter respondido.</em>
+                {% endif %}
+            </small>
         </div>
         {% endif %}
     </div>
@@ -314,6 +329,13 @@
         background-color: #dc3545;
         color: white;
     }
+    
+    .status-note {
+        display: block;
+        margin-top: 10px;
+        color: #6c757d;
+        font-size: 14px;
+    }
 </style>
 
 <script>
@@ -360,8 +382,29 @@
     
     function atualizarStatus(novoStatus) {
         if (confirm('Tem certeza que deseja atualizar o status para "' + novoStatus + '"?')) {
-            // TODO: Implementar atualização de status
-            alert('Funcionalidade de atualização de status será implementada em breve.');
+            const formData = new FormData();
+            formData.append('status', novoStatus);
+            
+            fetch('{% url "atualizar_status_orcamento" solicitacao.id %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Erro: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar status. Tente novamente.');
+            });
         }
     }
     
