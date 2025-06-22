@@ -1,0 +1,461 @@
+// Estilos específicos para páginas
+
+// Página de detalhes do evento
+.event-details-page {
+    .event-header {
+        background: linear-gradient(135deg, rgba($roxo-1, 0.1) 0%, rgba($roxo-3, 0.2) 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba($roxo-1, 0.1);
+        
+        h2 {
+            color: $roxo-1;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            
+            &::after {
+                content: '';
+                display: block;
+                width: 60px;
+                height: 3px;
+                background: $roxo-1;
+                margin-top: 0.5rem;
+                border-radius: 2px;
+            }
+        }
+        
+        .event-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+            
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.75rem;
+                background: rgba($branco, 0.7);
+                border-radius: 8px;
+                border-left: 3px solid $roxo-1;
+                
+                i {
+                    color: $roxo-1;
+                    font-size: 1.2rem;
+                }
+                
+                .meta-label {
+                    font-weight: 600;
+                    color: #333;
+                    font-size: 0.9rem;
+                }
+                
+                .meta-value {
+                    color: $cinza-texto;
+                    font-size: 0.9rem;
+                }
+            }
+        }
+    }
+    
+    .questions-section {
+        margin-top: 2rem;
+        
+        .question-item {
+            background: $branco;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba($roxo-1, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .question-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+                
+                .question-author {
+                    font-weight: 600;
+                    color: $roxo-1;
+                }
+                
+                .question-date {
+                    color: $cinza-texto;
+                    font-size: 0.85rem;
+                }
+            }
+            
+            .question-text {
+                color: #333;
+                line-height: 1.6;
+                margin-bottom: 1rem;
+            }
+            
+            .answer-section {
+                background: rgba($roxo-3, 0.2);
+                border-radius: 8px;
+                padding: 1rem;
+                margin-top: 1rem;
+                border-left: 3px solid $roxo-1;
+                
+                .answer-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 0.5rem;
+                    
+                    .answer-title {
+                        font-weight: 600;
+                        color: $roxo-1;
+                        font-size: 0.9rem;
+                    }
+                    
+                    .answer-date {
+                        color: $cinza-texto;
+                        font-size: 0.8rem;
+                    }
+                }
+                
+                .answer-text {
+                    color: #333;
+                    line-height: 1.5;
+                }
+            }
+        }
+    }
+}
+
+// Página de fornecedores
+.fornecedores-page {
+    .fornecedor-card {
+        background: $branco;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba($roxo-1, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fornecedor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            
+            .fornecedor-info {
+                h5 {
+                    color: $roxo-1;
+                    font-weight: 700;
+                    font-size: 1.3rem;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .fornecedor-meta {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                    
+                    .meta-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        color: $cinza-texto;
+                        font-size: 0.9rem;
+                        
+                        i {
+                            color: $roxo-1;
+                            width: 16px;
+                        }
+                    }
+                }
+            }
+            
+            .fornecedor-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    }
+}
+
+// Página de criação/edição de eventos
+.event-form-page {
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: linear-gradient(135deg, $branco 0%, #f8f9fa 100%);
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba($roxo-1, 0.1);
+    }
+    
+    .form-title {
+        color: $roxo-1;
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, $roxo-1, $roxo-3);
+            border-radius: 2px;
+        }
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+}
+
+// Página de confirmação
+.confirmation-page {
+    text-align: center;
+    padding: 3rem 1rem;
+    
+    .confirmation-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        
+        &.success {
+            color: #28a745;
+        }
+        
+        &.warning {
+            color: #ffc107;
+        }
+        
+        &.danger {
+            color: #dc3545;
+        }
+    }
+    
+    .confirmation-title {
+        color: $roxo-1;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .confirmation-message {
+        color: $cinza-texto;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .confirmation-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+// Página de perguntas e respostas
+.qa-page {
+    .question-form {
+        background: $branco;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba($roxo-1, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        
+        .form-title {
+            color: $roxo-1;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+    }
+    
+    .answer-form {
+        background: rgba($roxo-3, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border-left: 3px solid $roxo-1;
+        
+        .form-title {
+            color: $roxo-1;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+// Página de avaliação
+.rating-page {
+    .rating-form {
+        background: $branco;
+        border-radius: 15px;
+        padding: 2rem;
+        border: 1px solid rgba($roxo-1, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            
+            .star {
+                font-size: 2rem;
+                color: #ddd;
+                cursor: pointer;
+                transition: color 0.3s ease;
+                
+                &:hover,
+                &.active {
+                    color: #ffc107;
+                }
+            }
+        }
+        
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: $cinza-texto;
+        }
+    }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+    .event-details-page {
+        .event-header {
+            padding: 1.5rem;
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .event-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    }
+    
+    .fornecedores-page {
+        .fornecedor-card {
+            padding: 1rem;
+            
+            .fornecedor-header {
+                flex-direction: column;
+                gap: 1rem;
+                
+                .fornecedor-actions {
+                    flex-direction: row;
+                    justify-content: center;
+                }
+            }
+        }
+    }
+    
+    .event-form-page {
+        .form-container {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    }
+    
+    .confirmation-page {
+        padding: 2rem 1rem;
+        
+        .confirmation-title {
+            font-size: 1.5rem;
+        }
+        
+        .confirmation-actions {
+            flex-direction: column;
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    }
+    
+    .qa-page {
+        .question-form,
+        .answer-form {
+            padding: 1.5rem;
+        }
+    }
+    
+    .rating-page {
+        .rating-form {
+            padding: 1.5rem;
+        }
+    }
+}
+
+// Animações específicas para páginas
+.event-details-page,
+.fornecedores-page,
+.event-form-page,
+.confirmation-page,
+.qa-page,
+.rating-page {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+} 
