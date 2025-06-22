@@ -22,6 +22,9 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-save"></i> Atualizar Avaliação
                     </button>
+                    <a href="{% url 'excluir_avaliacao' avaliacao.id %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Excluir
+                    </a>
                     <a href="{% url 'detalhes_fornecedor' avaliacao.fornecedor.id %}" class="btn btn-secondary">
                         <i class="bi bi-x-circle"></i> Cancelar
                     </a>
@@ -30,4 +33,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('a[href*="excluir_avaliacao"]');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Tem certeza que deseja excluir esta avaliação?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}
