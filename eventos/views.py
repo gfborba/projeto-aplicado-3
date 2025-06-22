@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from usuarios.models import Fornecedor, Organizador
+from usuarios.utils import geocodificar_cep, atualizar_coordenadas_usuario
 from .models import Evento
 from .forms import EventoForm  # Criaremos este form depois
 
@@ -42,7 +43,44 @@ def criar_evento(request):
         if form.is_valid():
             evento = form.save(commit=False)
             evento.idUsuario = organizador
+            
+            # Geocodificar o CEP para obter coordenadas e endereço completo
+            cep = form.cleaned_data['cep']
+            if cep:
+                latitude, longitude = geocodificar_cep(cep)
+                if latitude and longitude:
+                    evento.latitude = latitude
+                    evento.longitude = longitude
+                    
+                    # Buscar endereço completo via ViaCEP
+                    import requests
+                    try:
+                        cep_limpo = cep.replace('-', '').replace('.', '').strip()
+                        viacep_url = f"https://viacep.com.br/ws/{cep_limpo}/json/"
+                        response = requests.get(viacep_url, timeout=5)
+                        
+                        if response.status_code == 200:
+                            data = response.json()
+                            if not data.get('erro'):
+                                endereco_parts = []
+                                if data.get('logradouro'):
+                                    endereco_parts.append(data['logradouro'])
+                                if data.get('bairro'):
+                                    endereco_parts.append(data['bairro'])
+                                if data.get('localidade'):
+                                    endereco_parts.append(data['localidade'])
+                                if data.get('uf'):
+                                    endereco_parts.append(data['uf'])
+                                if data.get('cep'):
+                                    endereco_parts.append(data['cep'])
+                                
+                                evento.endereco_completo = ', '.join(endereco_parts)
+                    except:
+                        #Se não conseguir buscar o endereço completo, usar apenas o CEP
+                        evento.endereco_completo = f"CEP: {cep}"
+            
             evento.save()
+            messages.success(request, 'Evento criado com sucesso!')
             return redirect('index')
     else:
         form = EventoForm()
@@ -67,7 +105,44 @@ def editar_evento(request, evento_id):
     if request.method == 'POST':
         form = EventoForm(request.POST, instance=evento)
         if form.is_valid():
-            form.save()
+            evento = form.save(commit=False)
+            
+            # Geocodificar o CEP para obter coordenadas e endereço completo
+            cep = form.cleaned_data['cep']
+            if cep:
+                latitude, longitude = geocodificar_cep(cep)
+                if latitude and longitude:
+                    evento.latitude = latitude
+                    evento.longitude = longitude
+                    
+                    # Buscar endereço completo via ViaCEP
+                    import requests
+                    try:
+                        cep_limpo = cep.replace('-', '').replace('.', '').strip()
+                        viacep_url = f"https://viacep.com.br/ws/{cep_limpo}/json/"
+                        response = requests.get(viacep_url, timeout=5)
+                        
+                        if response.status_code == 200:
+                            data = response.json()
+                            if not data.get('erro'):
+                                endereco_parts = []
+                                if data.get('logradouro'):
+                                    endereco_parts.append(data['logradouro'])
+                                if data.get('bairro'):
+                                    endereco_parts.append(data['bairro'])
+                                if data.get('localidade'):
+                                    endereco_parts.append(data['localidade'])
+                                if data.get('uf'):
+                                    endereco_parts.append(data['uf'])
+                                if data.get('cep'):
+                                    endereco_parts.append(data['cep'])
+                                
+                                evento.endereco_completo = ', '.join(endereco_parts)
+                    except:
+                        # Se não conseguir buscar o endereço completo, usar apenas o CEP
+                        evento.endereco_completo = f"CEP: {cep}"
+            
+            evento.save()
             messages.success(request, 'Evento atualizado com sucesso!')
             return redirect('index')
     else:

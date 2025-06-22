@@ -21,6 +21,9 @@
                     <h5>{{ evento.nomeEvento }}</h5>
                     <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
                     <p><strong>Local:</strong> {{ evento.localEvento }}</p>
+                    {% if evento.endereco_completo %}
+                        <p><strong>Endereço:</strong> {{ evento.endereco_completo }}</p>
+                    {% endif %}
                     <p>{{ evento.descricaoEvento }}</p>
                     <p><small>Organizador: {{ evento.idUsuario.user.get_full_name }}</small></p>
                 </div>
@@ -47,6 +50,9 @@
                     <h5>{{ evento.nomeEvento }}</h5>
                     <p><strong>Data:</strong> {{ evento.dataEvento|date:"d/m/Y H:i" }}</p>
                     <p><strong>Local:</strong> {{ evento.localEvento }}</p>
+                    {% if evento.endereco_completo %}
+                        <p><strong>Endereço:</strong> {{ evento.endereco_completo }}</p>
+                    {% endif %}
                     <p>{{ evento.descricaoEvento }}</p>
                     <div class="mt-2">
                         <a href="{% url 'editar_evento' evento.id %}" class="btn btn-sm btn-primary">Editar</a>

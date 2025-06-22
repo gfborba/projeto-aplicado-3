@@ -29,8 +29,20 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="{{ form.localEvento.id_for_label }}" class="form-label">Local</label>
+                    <label for="{{ form.cep.id_for_label }}" class="form-label">CEP do Local</label>
+                    {{ form.cep }}
+                    <small class="form-text text-muted">Digite o CEP para preenchimento automático do endereço</small>
+                    {% if form.cep.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.cep.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.localEvento.id_for_label }}" class="form-label">Nome do Local</label>
                     {{ form.localEvento }}
+                    <small class="form-text text-muted">Nome do local onde acontecerá o evento</small>
                     {% if form.localEvento.errors %}
                         <div class="invalid-feedback d-block">
                             {{ form.localEvento.errors }}

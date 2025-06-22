@@ -4,14 +4,32 @@ from .models import Evento
 class EventoForm(forms.ModelForm):
     class Meta:
         model = Evento
-        fields = ['nomeEvento', 'dataEvento', 'localEvento', 'descricaoEvento']
+        fields = ['nomeEvento', 'dataEvento', 'localEvento', 'descricaoEvento', 'cep']
         widgets = {
-            'dataEvento': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'descricaoEvento': forms.Textarea(attrs={'rows': 4}),
+            'nomeEvento': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome do evento'
+            }),
+            'dataEvento': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'localEvento': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome do local (ex: Centro de Eventos)'
+            }),
+            'descricaoEvento': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Descreva o evento...'
+            }),
+            'cep': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '00000-000',
+                'id': 'cep'
+            })
         }
-        labels = {
-            'nomeEvento': 'Nome do Evento',
-            'dataEvento': 'Data e Hora',
-            'localEvento': 'Local',
-            'descricaoEvento': 'Descrição',
-        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['cep'].required = True
