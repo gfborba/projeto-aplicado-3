@@ -1,0 +1,28 @@
+databases:
+  - name: eventosdb
+    plan: free
+    databaseName: eventos
+    user: eventos
+
+services:
+  - type: web
+    plan: free
+    name: eventos-app
+    runtime: python
+    buildCommand: './build.sh'
+    startCommand: 'python -m gunicorn core.asgi:application -k uvicorn.workers.UvicornWorker'
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: eventosdb
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: eventos-app.onrender.com
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: WEB_CONCURRENCY
+        value: 4
