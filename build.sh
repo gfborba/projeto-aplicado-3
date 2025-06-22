@@ -2,6 +2,9 @@
 # Exit on error
 set -o errexit
 
+# Set Django settings module
+export DJANGO_SETTINGS_MODULE=core.settings
+
 # Modify this line as needed for your package manager (pip, poetry, etc.)
 pip install -r requirements.txt
 
