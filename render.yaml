@@ -23,7 +23,7 @@ services:
       - key: DEBUG
         value: false
       - key: ALLOWED_HOSTS
-        value: eventos-app.onrender.com
+        value: eventos-app-mzh7.onrender.com
       - key: GOOGLE_MAPS_API_KEY
         sync: false
       - key: WEB_CONCURRENCY

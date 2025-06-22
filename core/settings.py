@@ -184,8 +184,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Configurações de segurança para produção
 if not DEBUG:
-    # HTTPS settings
-    SECURE_SSL_REDIRECT = True
+    # HTTPS settings - comentado temporariamente para debug
+    # SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
     # HSTS settings
@@ -193,9 +193,9 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     
-    # CSRF settings
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
+    # CSRF settings - comentado temporariamente para debug
+    # CSRF_COOKIE_SECURE = True
+    # SESSION_COOKIE_SECURE = True
     
     # Security headers
     SECURE_BROWSER_XSS_FILTER = True
