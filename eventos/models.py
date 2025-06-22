@@ -1,5 +1,5 @@
 from django.db import models
-from usuarios.models import Organizador
+from usuarios.models import Organizador, Fornecedor
 from decimal import Decimal
 
 class Evento(models.Model):
@@ -53,3 +53,27 @@ class Resposta(models.Model):
 
     def __str__(self):
         return f"Resposta de {self.organizador.user.username} para pergunta #{self.pergunta.id}"
+    
+    
+class AvaliacaoFornecedor(models.Model):
+    NOTA_CHOICES = [
+        (1, '1 - Péssimo'),
+        (2, '2 - Ruim'),
+        (3, '3 - Regular'),
+        (4, '4 - Bom'),
+        (5, '5 - Excelente'),
+    ]
+    
+    fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE, related_name='avaliacoes')
+    organizador = models.ForeignKey(Organizador, on_delete=models.CASCADE, related_name='avaliacoes_feitas')
+    nota = models.PositiveSmallIntegerField(choices=NOTA_CHOICES)
+    comentario = models.TextField(blank=True, null=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('fornecedor', 'organizador') 
+        verbose_name = 'Avaliação de Fornecedor'
+        verbose_name_plural = 'Avaliações de Fornecedores'
+
+    def __str__(self):
+        return f"Avaliação de {self.organizador} para {self.fornecedor} - Nota: {self.nota}"

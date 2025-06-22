@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from usuarios.models import Fornecedor, Organizador
 from usuarios.utils import geocodificar_cep, atualizar_coordenadas_usuario
-from .models import Evento, Pergunta, Resposta
-from .forms import EventoForm, PerguntaForm, RespostaForm
+from .models import Evento, Pergunta, Resposta, AvaliacaoFornecedor
+from .forms import EventoForm, PerguntaForm, RespostaForm, AvaliacaoFornecedorForm
+from django.db import models
 
 @login_required(login_url='login')
 def index(request):
@@ -267,4 +268,119 @@ def detalhes_evento(request, evento_id):
         'perguntas': perguntas,
         'is_fornecedor': is_fornecedor,
         'is_organizador_dono': is_organizador_dono
+    })
+
+    
+@login_required
+def avaliar_fornecedor(request, fornecedor_id):
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+    except Organizador.DoesNotExist:
+        messages.error(request, 'Apenas organizadores podem avaliar fornecedores.')
+        return redirect('index')
+    
+    fornecedor = get_object_or_404(Fornecedor, id=fornecedor_id)
+    
+    # Verifica se já existe uma avaliação deste organizador para este fornecedor
+    try:
+        avaliacao_existente = AvaliacaoFornecedor.objects.get(
+            organizador=organizador,
+            fornecedor=fornecedor
+        )
+        # Se já existe, redireciona para edição
+        return redirect('editar_avaliacao', avaliacao_id=avaliacao_existente.id)
+    except AvaliacaoFornecedor.DoesNotExist:
+        pass
+    
+    if request.method == 'POST':
+        form = AvaliacaoFornecedorForm(request.POST)
+        if form.is_valid():
+            avaliacao = form.save(commit=False)
+            avaliacao.organizador = organizador
+            avaliacao.fornecedor = fornecedor
+            avaliacao.save()
+            messages.success(request, 'Avaliação registrada com sucesso!')
+            return redirect('detalhes_fornecedor', fornecedor_id=fornecedor.id)
+    else:
+        form = AvaliacaoFornecedorForm()
+    
+    return render(request, 'pages/avaliar_fornecedor.html', {
+        'form': form,
+        'fornecedor': fornecedor
+    })
+
+@login_required
+def editar_avaliacao(request, avaliacao_id):
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+    except Organizador.DoesNotExist:
+        messages.error(request, 'Apenas organizadores podem editar avaliações.')
+        return redirect('index')
+    
+    avaliacao = get_object_or_404(AvaliacaoFornecedor, id=avaliacao_id)
+    
+    # Verifica se o organizador é o autor da avaliação
+    if avaliacao.organizador != organizador:
+        messages.error(request, 'Você só pode editar suas próprias avaliações.')
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = AvaliacaoFornecedorForm(request.POST, instance=avaliacao)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Avaliação atualizada com sucesso!')
+            return redirect('detalhes_fornecedor', fornecedor_id=avaliacao.fornecedor.id)
+    else:
+        form = AvaliacaoFornecedorForm(instance=avaliacao)
+    
+    return render(request, 'pages/editar_avaliacao.html', {
+        'form': form,
+        'avaliacao': avaliacao,
+        'fornecedor': avaliacao.fornecedor  # Adicionando fornecedor ao contexto
+    })
+
+@login_required
+def detalhes_fornecedor(request, fornecedor_id):
+    fornecedor = get_object_or_404(Fornecedor, id=fornecedor_id)
+    avaliacoes = fornecedor.avaliacoes.all().order_by('-data_criacao')
+    
+    # Verifica se o usuário atual é um organizador que já avaliou este fornecedor
+    ja_avaliou = False
+    avaliacao_usuario = None
+    
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+        try:
+            avaliacao_usuario = AvaliacaoFornecedor.objects.get(
+                organizador=organizador,
+                fornecedor=fornecedor
+            )
+            ja_avaliou = True
+        except AvaliacaoFornecedor.DoesNotExist:
+            pass
+    except Organizador.DoesNotExist:
+        pass
+    
+    media_avaliacoes = fornecedor.avaliacoes.aggregate(models.Avg('nota'))['nota__avg']
+    media_avaliacoes = round(media_avaliacoes, 1) if media_avaliacoes is not None else None
+    
+    return render(request, 'pages/detalhes_fornecedor.html', {
+        'fornecedor': fornecedor,
+        'avaliacoes': avaliacoes,
+        'media_avaliacoes': media_avaliacoes,
+        'ja_avaliou': ja_avaliou,
+        'avaliacao_usuario': avaliacao_usuario,
+        'is_organizador': hasattr(request.user, 'organizador')
+    })
+
+@login_required
+def todos_fornecedores(request):
+    fornecedores = Fornecedor.objects.all().order_by('categoria', 'user__first_name')
+    
+    # Verifica se o usuário é um organizador
+    is_organizador = hasattr(request.user, 'organizador')
+    
+    return render(request, 'pages/todos_fornecedores.html', {
+        'fornecedores': fornecedores,
+        'is_organizador': is_organizador
     })

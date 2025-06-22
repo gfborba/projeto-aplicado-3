@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2>Editar Avaliação para {{ avaliacao.fornecedor.user.get_full_name }}</h2>
+            <p class="mb-0">Avaliação atual: {{ avaliacao.get_nota_display }}</p>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Nota</label>
+                    {{ form.nota }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Comentário (opcional)</label>
+                    {{ form.comentario }}
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Atualizar Avaliação
+                    </button>
+                    <a href="{% url 'detalhes_fornecedor' avaliacao.fornecedor.id %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

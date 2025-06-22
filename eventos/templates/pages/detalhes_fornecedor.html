@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>{{ fornecedor.user.get_full_name }}</h2>
+            <p class="mb-0">Categoria: {{ fornecedor.get_categoria_display }}</p>
+        </div>
+        <div class="card-body">
+            <p><i class="bi bi-geo-alt"></i> {{ fornecedor.endereco_completo }}</p>
+            <p><i class="bi bi-telephone"></i> {{ fornecedor.telefone }}</p>
+            <p><i class="bi bi-envelope"></i> {{ fornecedor.user.email }}</p>
+
+            <div class="mt-4">
+                <h4>Avaliações</h4>
+                {% if media_avaliacoes is not None %}
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <span class="display-5">{{ media_avaliacoes|floatformat:1 }}</span>
+                        <span class="text-muted">/ 5.0</span>
+                    </div>
+                    <div>
+                        {% with media_avaliacoes|floatformat:0 as media_int %}
+                        {% for i in "12345" %}
+                        {% if forloop.counter <= media_int %} <i class="bi bi-star-fill text-warning"></i>
+                            {% else %}
+                            <i class="bi bi-star text-warning"></i>
+                            {% endif %}
+                            {% endfor %}
+                            {% endwith %}
+                            <div class="text-muted small">
+                                {{ fornecedor.avaliacoes.count }} avaliação{{ fornecedor.avaliacoes.count|pluralize }}
+                            </div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">Este fornecedor ainda não possui avaliações.</p>
+                {% endif %}
+
+                {% if is_organizador %}
+                {% if ja_avaliou %}
+                <div class="alert alert-info">
+                    <p>Você avaliou este fornecedor com nota {{ avaliacao_usuario.nota }}.</p>
+                    <a href="{% url 'editar_avaliacao' avaliacao_usuario.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Editar Avaliação
+                    </a>
+                </div>
+                {% else %}
+                <a href="{% url 'avaliar_fornecedor' fornecedor.id %}" class="btn btn-primary">
+                    <i class="bi bi-star"></i> Avaliar Fornecedor
+                </a>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Últimas Avaliações</h4>
+        </div>
+        <div class="card-body">
+            {% if avaliacoes %}
+            <div class="list-group">
+                {% for avaliacao in avaliacoes %}
+                <div class="list-group-item mb-3">
+                    <div class="d-flex justify-content-between">
+                        <h5>{{ avaliacao.organizador.user.get_full_name }}</h5>
+                        <div>
+                            {% for _ in ''|center:5 %}
+                            {% if forloop.counter <= avaliacao.nota %} <i class="bi bi-star-fill text-warning"></i>
+                                {% else %}
+                                <i class="bi bi-star text-warning"></i>
+                                {% endif %}
+                                {% endfor %}
+                                <small class="text-muted">{{ avaliacao.data_criacao|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                    {% if avaliacao.comentario %}
+                    <p class="mt-2">{{ avaliacao.comentario }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">Nenhuma avaliação disponível.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{% url 'todos_fornecedores' %}" class="btn btn-secondary mt-3">
+        <i class="bi bi-arrow-left"></i> Voltar para Fornecedores
+    </a>
+</div>
+{% endblock %}
