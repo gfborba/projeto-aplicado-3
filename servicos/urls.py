@@ -12,4 +12,5 @@ urlpatterns = [
     path('<int:servico_id>/remover-item/<int:item_id>/', views.remover_item, name='remover_item'),
     path('<int:servico_id>/adicionar-tag/', views.adicionar_tag, name='adicionar_tag'),
     path('<int:servico_id>/remover-tag/', views.remover_tag, name='remover_tag'),
+    path('solicitar-orcamento/', views.solicitar_orcamento, name='solicitar_orcamento'),
 ]
