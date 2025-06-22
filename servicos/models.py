@@ -117,4 +117,23 @@ class SolicitacaoOrcamento(models.Model):
     def total_itens_selecionados(self):
         return len(self.itens_selecionados)
 
+class HistoricoOrcamento(models.Model):
+    TIPO_CHOICES = [
+        ('organizador', 'Organizador'),
+        ('fornecedor', 'Fornecedor'),
+    ]
+    
+    solicitacao = models.ForeignKey(SolicitacaoOrcamento, on_delete=models.CASCADE, related_name='historico')
+    tipo_usuario = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    mensagem = models.TextField()
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'Histórico de Orçamento'
+        verbose_name_plural = 'Histórico de Orçamentos'
+        ordering = ['data_criacao']
+    
+    def __str__(self):
+        return f"Mensagem de {self.tipo_usuario} em {self.solicitacao} - {self.data_criacao.strftime('%d/%m/%Y %H:%M')}"
+
 

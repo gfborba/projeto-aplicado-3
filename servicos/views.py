@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
 from django.conf import settings
-from .models import Servico, Item, ImagemServico, SolicitacaoOrcamento
+from .models import Servico, Item, ImagemServico, SolicitacaoOrcamento, HistoricoOrcamento
 from usuarios.models import Fornecedor, Organizador
 from usuarios.utils import verificar_cobertura_fornecedor
 import json
@@ -385,18 +385,26 @@ def solicitar_orcamento(request):
         itens_selecionados = data.get('itens_selecionados', [])
         consideracoes = data.get('consideracoes', '')
         
-        # Validar dados
+        #ID Eventos
+        try:
+            evento_id = int(evento_id)
+            servico_id = int(servico_id)
+            itens_selecionados = [int(item_id) for item_id in itens_selecionados]
+        except (ValueError, TypeError):
+            return JsonResponse({'success': False, 'error': 'IDs inválidos'})
+        
+        #Valida dados
         if not evento_id or not servico_id:
             return JsonResponse({'success': False, 'error': 'Dados incompletos'})
         
-        # Verificar se o evento pertence ao organizador
+        #Verifica se o evento pertence ao organizador
         from eventos.models import Evento
         evento = get_object_or_404(Evento, id=evento_id, idUsuario=organizador)
         
-        # Verificar se o serviço existe e está ativo
+        #Verifica se o serviço existe e está ativo
         servico = get_object_or_404(Servico, id=servico_id, ativo=True)
         
-        # Criar a solicitação de orçamento
+        #Cria a solicitação de orçamento
         solicitacao = SolicitacaoOrcamento.objects.create(
             organizador=organizador,
             fornecedor=servico.fornecedor,
@@ -405,6 +413,14 @@ def solicitar_orcamento(request):
             itens_selecionados=itens_selecionados,
             consideracoes=consideracoes
         )
+        
+        #Cria primeiro registro no histórico
+        if consideracoes:
+            HistoricoOrcamento.objects.create(
+                solicitacao=solicitacao,
+                tipo_usuario='organizador',
+                mensagem=consideracoes
+            )
         
         return JsonResponse({
             'success': True,
@@ -416,3 +432,106 @@ def solicitar_orcamento(request):
         return JsonResponse({'success': False, 'error': 'Dados inválidos'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+def minhas_solicitacoes_organizador(request):
+    #Lista as solicitações de orçamento feitas pelo organizador
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+    except Organizador.DoesNotExist:
+        messages.error(request, 'Acesso restrito apenas para organizadores.')
+        return redirect('index')
+    
+    solicitacoes = SolicitacaoOrcamento.objects.filter(organizador=organizador).select_related(
+        'fornecedor__user', 'servico', 'evento'
+    ).order_by('-data_solicitacao')
+    
+    return render(request, 'pages/minhas_solicitacoes_organizador.html', {
+        'solicitacoes': solicitacoes,
+        'organizador': organizador
+    })
+
+@login_required
+def minhas_solicitacoes_fornecedor(request):
+    #Lista as solicitações de orçamento recebidas pelo fornecedor
+    try:
+        fornecedor = Fornecedor.objects.get(user=request.user)
+    except Fornecedor.DoesNotExist:
+        messages.error(request, 'Acesso restrito apenas para fornecedores.')
+        return redirect('index')
+    
+    solicitacoes = SolicitacaoOrcamento.objects.filter(fornecedor=fornecedor).select_related(
+        'organizador__user', 'servico', 'evento'
+    ).order_by('-data_solicitacao')
+    
+    return render(request, 'pages/minhas_solicitacoes_fornecedor.html', {
+        'solicitacoes': solicitacoes,
+        'fornecedor': fornecedor
+    })
+
+@login_required
+def detalhes_solicitacao(request, solicitacao_id):
+    #Mostra os detalhes de uma solicitação de orçamento
+    solicitacao = get_object_or_404(SolicitacaoOrcamento, id=solicitacao_id)
+    
+    #Verifica permissão
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+        if solicitacao.organizador != organizador:
+            messages.error(request, 'Você não tem permissão para acessar esta solicitação.')
+            return redirect('minhas_solicitacoes_organizador')
+        tipo_usuario = 'organizador'
+    except Organizador.DoesNotExist:
+        try:
+            fornecedor = Fornecedor.objects.get(user=request.user)
+            if solicitacao.fornecedor != fornecedor:
+                messages.error(request, 'Você não tem permissão para acessar esta solicitação.')
+                return redirect('minhas_solicitacoes_fornecedor')
+            tipo_usuario = 'fornecedor'
+        except Fornecedor.DoesNotExist:
+            messages.error(request, 'Acesso negado.')
+            return redirect('index')
+    
+    return render(request, 'pages/detalhes_solicitacao.html', {
+        'solicitacao': solicitacao,
+        'tipo_usuario': tipo_usuario
+    })
+
+@login_required
+def adicionar_mensagem_orcamento(request, solicitacao_id):
+    #Adiciona uma mensagem ao histórico do orçamento
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método não permitido'})
+    
+    solicitacao = get_object_or_404(SolicitacaoOrcamento, id=solicitacao_id)
+    mensagem = request.POST.get('mensagem', '').strip()
+    
+    if not mensagem:
+        return JsonResponse({'success': False, 'error': 'Mensagem não pode estar vazia'})
+    
+    #Verifica permissão e determinar tipo de usuário
+    try:
+        organizador = Organizador.objects.get(user=request.user)
+        if solicitacao.organizador != organizador:
+            return JsonResponse({'success': False, 'error': 'Permissão negada'})
+        tipo_usuario = 'organizador'
+    except Organizador.DoesNotExist:
+        try:
+            fornecedor = Fornecedor.objects.get(user=request.user)
+            if solicitacao.fornecedor != fornecedor:
+                return JsonResponse({'success': False, 'error': 'Permissão negada'})
+            tipo_usuario = 'fornecedor'
+        except Fornecedor.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Acesso negado'})
+    
+    #Cria mensagem no histórico
+    HistoricoOrcamento.objects.create(
+        solicitacao=solicitacao,
+        tipo_usuario=tipo_usuario,
+        mensagem=mensagem
+    )
+    
+    return JsonResponse({
+        'success': True,
+        'message': 'Mensagem adicionada com sucesso!'
+    })

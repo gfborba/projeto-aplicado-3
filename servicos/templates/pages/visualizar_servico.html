@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    {% csrf_token %}
     <div class="container">
         <div class="servico-header">
             <h1>{{ servico.nome }}</h1>
@@ -86,7 +87,7 @@
         </div>
         
         <div class="servico-actions">
-            <button class="btn-primary" onclick="abrirModalOrcamento()">💰 Solicitar Orçamento</button>
+            <button class="btn-primary" id="btnSolicitarOrcamento">💰 Solicitar Orçamento</button>
             <a href="{% url 'chat_room' servico.fornecedor.user.username %}" class="btn-secondary">💬 Conversar com Fornecedor</a>
             <a href="{% url 'todos_servicos' %}" class="btn-secondary">← Voltar aos Serviços</a>
         </div>
@@ -96,7 +97,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Solicitar Orçamento</h2>
-                <span class="close" onclick="fecharModalOrcamento()">&times;</span>
+                <span class="close">&times;</span>
             </div>
             
             <div id="etapa1" class="modal-body">
@@ -161,8 +162,8 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button onclick="voltarEtapa1()" class="btn-secondary">← Voltar</button>
-                    <button onclick="enviarSolicitacao()" class="btn-primary">Enviar Solicitação</button>
+                    <button class="btn-secondary" id="btnVoltar">← Voltar</button>
+                    <button class="btn-primary" id="btnEnviarSolicitacao">Enviar Solicitação</button>
                 </div>
             </div>
         </div>
@@ -209,6 +210,19 @@
         let eventoSelecionado = null;
         
         document.addEventListener('DOMContentLoaded', function() {
+            // Event listener para o botão de abrir modal
+            document.getElementById('btnSolicitarOrcamento').addEventListener('click', abrirModalOrcamento);
+            
+            // Event listener para o botão de fechar modal
+            document.querySelector('.close').addEventListener('click', fecharModalOrcamento);
+            
+            // Event listener para o botão voltar
+            document.getElementById('btnVoltar').addEventListener('click', voltarEtapa1);
+            
+            // Event listener para o botão enviar solicitação
+            document.getElementById('btnEnviarSolicitacao').addEventListener('click', enviarSolicitacao);
+            
+            // Event listeners para os itens de evento
             document.querySelectorAll('.evento-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const id = parseInt(this.dataset.eventoId);
@@ -261,6 +275,8 @@
         }
         
         function enviarSolicitacao() {
+            console.log('Função enviarSolicitacao chamada');
+            
             if (!eventoSelecionado) {
                 alert('Por favor, selecione um evento.');
                 return;
@@ -282,6 +298,9 @@
                 consideracoes: consideracoes
             };
             
+            console.log('Dados a serem enviados:', dados);
+            console.log('CSRF Token:', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
             fetch('{% url "solicitar_orcamento" %}', {
                 method: 'POST',
                 headers: {
@@ -290,8 +309,12 @@
                 },
                 body: JSON.stringify(dados)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.success) {
                     alert('Solicitação de orçamento enviada com sucesso!');
                     fecharModalOrcamento();
