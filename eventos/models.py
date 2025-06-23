@@ -24,7 +24,7 @@ class Evento(models.Model):
     
     def tem_coordenadas(self):
         return self.latitude is not None and self.longitude is not None
-    
+
 class Pergunta(models.Model):
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='perguntas')
     fornecedor = models.ForeignKey('usuarios.Fornecedor', on_delete=models.CASCADE, related_name='perguntas_feitas')
