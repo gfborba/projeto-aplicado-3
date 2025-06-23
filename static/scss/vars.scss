@@ -1,3 +1,20 @@
+@mixin transition($property: all, $duration: 0.3s, $ease: ease-in-out) {
+  transition: $property $duration $ease;
+}
+
+// Novas variáveis para login e outros componentes
+$primary-color: #927EBF;
+$white: #FFFFFF;
+$light-purple: lighten($primary-color, 20%);
+$dark-purple: darken($primary-color, 15%);
+$gray-light: #f8f9fa;
+$gray-medium: #e9ecef;
+$gray-dark: #6c757d;
+$black: #212529;
+$icon-size: 1.5rem;
+$sidebar-bg: lighten($primary-color, 35%);
+
+// Variáveis antigas (se usadas em outros lugares)
 $cor-fundo: #EFEFEF;
 $roxo-1: #927EBF;
 $roxo-2: #D9D9D9;
