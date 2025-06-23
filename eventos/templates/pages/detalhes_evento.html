@@ -26,6 +26,58 @@
         </div>
     </div>
 
+    <!-- Seção de Fornecedores Vinculados -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Fornecedores deste Evento</h3>
+        </div>
+        <div class="card-body">
+            {% if fornecedores_vinculados %}
+                <div class="fornecedores-grid">
+                    {% for fornecedor in fornecedores_vinculados %}
+                        <div class="fornecedor-card">
+                            <div class="fornecedor-info">
+                                <h5>{{ fornecedor.user.get_full_name|default:fornecedor.user.username }}</h5>
+                                <p><strong>Email:</strong> {{ fornecedor.user.email }}</p>
+                                {% if fornecedor.telefone %}
+                                    <p><strong>Telefone:</strong> {{ fornecedor.telefone }}</p>
+                                {% endif %}
+                                {% if fornecedor.empresa %}
+                                    <p><strong>Empresa:</strong> {{ fornecedor.empresa }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="fornecedor-actions">
+                                <a href="{% url 'chat_room' fornecedor.user.username %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-chat"></i> Conversar
+                                </a>
+                                <a href="{% url 'avaliar_fornecedor' fornecedor.id %}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-star"></i> Avaliar
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Nenhum fornecedor vinculado a este evento ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Seção de Adicionar Compromisso -->
+    {% if is_organizador_dono %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Gerenciar Compromissos</h3>
+        </div>
+        <div class="card-body">
+            <p>Adicione compromissos relacionados a este evento na sua agenda.</p>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAdicionarCompromisso">
+                <i class="bi bi-calendar-plus"></i> Adicionar Compromisso
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-header">
             <h3>Perguntas e Respostas</h3>
@@ -69,4 +121,186 @@
         <i class="bi bi-arrow-left"></i> Voltar
     </a>
 </div>
+
+<!-- Modal para Adicionar Compromisso -->
+{% if is_organizador_dono %}
+<div class="modal fade" id="modalAdicionarCompromisso" tabindex="-1" aria-labelledby="modalAdicionarCompromissoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAdicionarCompromissoLabel">Adicionar Compromisso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAdicionarCompromisso">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="titulo" class="form-label">Título *</label>
+                                <input type="text" class="form-control" id="titulo" name="titulo" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo</label>
+                                <select class="form-select" id="tipo" name="tipo">
+                                    <option value="reuniao">Reunião</option>
+                                    <option value="consulta">Consulta</option>
+                                    <option value="lembrete">Lembrete</option>
+                                    <option value="outro">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_inicio" class="form-label">Data de Início *</label>
+                                <input type="datetime-local" class="form-control" id="data_inicio" name="data_inicio" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="data_fim" class="form-label">Data de Fim *</label>
+                                <input type="datetime-local" class="form-control" id="data_fim" name="data_fim" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="local" class="form-label">Local</label>
+                                <input type="text" class="form-control" id="local" name="local" value="{{ evento.localEvento }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="prioridade" class="form-label">Prioridade</label>
+                                <select class="form-select" id="prioridade" name="prioridade">
+                                    <option value="baixa">Baixa</option>
+                                    <option value="media" selected>Média</option>
+                                    <option value="alta">Alta</option>
+                                    <option value="urgente">Urgente</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
+                    </div>
+                    
+                    {% if fornecedores_vinculados %}
+                    <div class="mb-3">
+                        <label class="form-label">Vincular Fornecedores</label>
+                        <div class="fornecedores-checkboxes">
+                            {% for fornecedor in fornecedores_vinculados %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="fornecedores" value="{{ fornecedor.id }}" id="fornecedor_{{ fornecedor.id }}">
+                                    <label class="form-check-label" for="fornecedor_{{ fornecedor.id }}">
+                                        {{ fornecedor.user.get_full_name|default:fornecedor.user.username }}
+                                        {% if fornecedor.empresa %} - {{ fornecedor.empresa }}{% endif %}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="adicionarCompromisso()">
+                    <i class="bi bi-calendar-plus"></i> Adicionar Compromisso
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .fornecedores-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .fornecedor-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
+    }
+    
+    .fornecedor-info h5 {
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .fornecedor-info p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .fornecedor-actions {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .fornecedores-checkboxes {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        background: #f8f9fa;
+    }
+    
+    .form-check {
+        margin-bottom: 8px;
+    }
+</style>
+
+<script>
+    function adicionarCompromisso() {
+        const form = document.getElementById('formAdicionarCompromisso');
+        const formData = new FormData(form);
+        
+        // Adicionar o ID do evento
+        formData.append('evento_id', '{{ evento.id }}');
+        
+        fetch('{% url "adicionar_compromisso_evento" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Compromisso adicionado com sucesso!');
+                // Fechar o modal usando Bootstrap 5
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalAdicionarCompromisso'));
+                if (modal) {
+                    modal.hide();
+                }
+                form.reset();
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao adicionar compromisso. Tente novamente.');
+        });
+    }
+</script>
 {% endblock %}

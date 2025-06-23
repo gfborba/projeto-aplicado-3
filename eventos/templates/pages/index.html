@@ -11,7 +11,7 @@
             <p>Gerencie seus serviços e conecte-se com organizadores de eventos.</p>
             <div class="action-buttons">
                 <a href="{% url 'meus_servicos' %}" class="btn btn-primary">Meus Serviços</a>
-                <a href="{% url 'configurar_raio_cobertura' %}" class="btn-secondary">⚙️ Configurar Raio de Cobertura</a>
+                <a href="{% url 'configurar_raio_cobertura' %}" class="btn btn-secondary">⚙️ Configurar Raio de Cobertura</a>
                 <a href="{% url 'minhas_solicitacoes_fornecedor' %}" class="btn btn-info">💰 Minhas Solicitações de Orçamento</a>
                 <a href="{% url 'agenda' %}" class="btn btn-warning">📅 Minha Agenda</a>
             </div>
@@ -99,9 +99,6 @@
                         <a href="{% url 'excluir_evento' evento.id %}" class="btn btn-sm btn-danger">Excluir</a>
                         <a href="{% url 'detalhes_evento' evento.id %}" class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-eye"></i> Detalhes
-                        </a>
-                        <a href="{% url 'todos_fornecedores'  %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i> Avaliar Fornecedor
                         </a>
                     </div>
                 </div>

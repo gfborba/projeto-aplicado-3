@@ -6,6 +6,11 @@ from usuarios.utils import geocodificar_cep, atualizar_coordenadas_usuario
 from .models import Evento, Pergunta, Resposta, AvaliacaoFornecedor
 from .forms import EventoForm, PerguntaForm, RespostaForm, AvaliacaoFornecedorForm
 from django.db import models
+from django.http import JsonResponse
+from django.utils import timezone
+from agenda.models import EventoAgenda
+from datetime import datetime
+import json
 
 @login_required(login_url='login')
 def index(request):
@@ -263,11 +268,18 @@ def detalhes_evento(request, evento_id):
     
     perguntas = evento.perguntas.all().order_by('-data_criacao')
     
+    # Buscar fornecedores vinculados através de orçamentos aceitos
+    fornecedores_vinculados = Fornecedor.objects.filter(
+        solicitacoes_recebidas__evento=evento,
+        solicitacoes_recebidas__status='aceito'
+    ).distinct()
+    
     return render(request, 'pages/detalhes_evento.html', {
         'evento': evento,
         'perguntas': perguntas,
         'is_fornecedor': is_fornecedor,
-        'is_organizador_dono': is_organizador_dono
+        'is_organizador_dono': is_organizador_dono,
+        'fornecedores_vinculados': fornecedores_vinculados
     })
 
     
@@ -409,3 +421,90 @@ def excluir_avaliacao(request, avaliacao_id):
     return render(request, 'pages/confirmar_exclusao_avaliacao.html', {
         'avaliacao': avaliacao
     })
+
+@login_required
+def adicionar_compromisso_evento(request):
+    """Adiciona um compromisso relacionado ao evento na agenda"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método não permitido'})
+    
+    try:
+        # Verificar se é organizador
+        organizador = Organizador.objects.get(user=request.user)
+    except Organizador.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Acesso restrito apenas para organizadores'})
+    
+    try:
+        # Obter dados do formulário
+        evento_id = request.POST.get('evento_id')
+        titulo = request.POST.get('titulo', '').strip()
+        descricao = request.POST.get('descricao', '').strip()
+        data_inicio = request.POST.get('data_inicio')
+        data_fim = request.POST.get('data_fim')
+        local = request.POST.get('local', '').strip()
+        tipo = request.POST.get('tipo', 'reuniao')
+        prioridade = request.POST.get('prioridade', 'media')
+        fornecedores_ids = request.POST.getlist('fornecedores')
+        
+        # Validações
+        if not evento_id or not titulo or not data_inicio or not data_fim:
+            return JsonResponse({'success': False, 'error': 'Campos obrigatórios não preenchidos'})
+        
+        # Verificar se o evento existe e pertence ao organizador
+        evento = get_object_or_404(Evento, id=evento_id, idUsuario=organizador)
+        
+        # Converter datas
+        try:
+            data_inicio = datetime.fromisoformat(data_inicio.replace('Z', '+00:00'))
+            data_fim = datetime.fromisoformat(data_fim.replace('Z', '+00:00'))
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'Formato de data inválido'})
+        
+        # Verificar se data_fim é posterior a data_inicio
+        if data_fim <= data_inicio:
+            return JsonResponse({'success': False, 'error': 'Data de fim deve ser posterior à data de início'})
+        
+        # Criar o evento na agenda
+        evento_agenda = EventoAgenda.objects.create(
+            titulo=titulo,
+            descricao=descricao,
+            data_inicio=data_inicio,
+            data_fim=data_fim,
+            local=local,
+            tipo=tipo,
+            prioridade=prioridade,
+            usuario=request.user,
+            organizador=organizador,
+            evento_relacionado=evento
+        )
+        
+        # Vincular fornecedores selecionados
+        if fornecedores_ids:
+            fornecedores = Fornecedor.objects.filter(
+                id__in=fornecedores_ids,
+                solicitacoes_recebidas__evento=evento,
+                solicitacoes_recebidas__status='aceito'
+            )
+            for fornecedor in fornecedores:
+                # Criar uma cópia do evento para cada fornecedor vinculado
+                EventoAgenda.objects.create(
+                    titulo=f"{titulo} - {fornecedor.user.get_full_name() or fornecedor.user.username}",
+                    descricao=descricao,
+                    data_inicio=data_inicio,
+                    data_fim=data_fim,
+                    local=local,
+                    tipo=tipo,
+                    prioridade=prioridade,
+                    usuario=fornecedor.user,
+                    fornecedor=fornecedor,
+                    evento_relacionado=evento
+                )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Compromisso adicionado com sucesso!',
+            'evento_id': evento_agenda.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
