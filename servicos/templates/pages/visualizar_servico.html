@@ -89,6 +89,7 @@
         <div class="servico-actions">
             <button class="btn-primary" id="btnSolicitarOrcamento">💰 Solicitar Orçamento</button>
             <a href="{% url 'chat_room' servico.fornecedor.user.username %}" class="btn-secondary">💬 Conversar com Fornecedor</a>
+            <a href="{% url 'avaliar_fornecedor' servico.fornecedor.id %}" class="btn-secondary">⭐ Avaliar Fornecedor</a>
             <a href="{% url 'todos_servicos' %}" class="btn-secondary">← Voltar aos Serviços</a>
         </div>
     </div>

@@ -14,5 +14,6 @@ urlpatterns = [
     path('fornecedor/<int:fornecedor_id>/avaliar/', views.avaliar_fornecedor, name='avaliar_fornecedor'),
     path('avaliacao/<int:avaliacao_id>/editar/', views.editar_avaliacao, name='editar_avaliacao'),
     path('avaliacao/<int:avaliacao_id>/excluir/', views.excluir_avaliacao, name='excluir_avaliacao'),
+    path('adicionar-compromisso/', views.adicionar_compromisso_evento, name='adicionar_compromisso_evento'),
 ]
    
