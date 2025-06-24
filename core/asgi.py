@@ -8,6 +8,11 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 
 import os
+import django
+
+# Configure Django settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+django.setup()
 
 # Configurar o Django antes de qualquer import que dependa dos modelos
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')

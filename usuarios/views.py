@@ -9,6 +9,10 @@ from .models import Organizador, Fornecedor
 from .utils import atualizar_coordenadas_usuario
 import json
 import requests
+import logging
+
+# Configurar logger
+logger = logging.getLogger(__name__)
 
 #-------------------------CADASTRO-------------------------
 
@@ -50,53 +54,97 @@ def cadastro_organizador(request):
     if request.method == "GET":
         return render(request, 'pages/cadastro_organizador.html')
     else:
-        username = request.POST.get('username')
-        firstname = request.POST.get('firstname')
-        lastname = request.POST.get('lastname')
-        email = request.POST.get('email')
-        senha = request.POST.get('senha')
-        cep = request.POST.get('cep')
-        estado = request.POST.get('estado')
-        cidade = request.POST.get('cidade')
-        bairro = request.POST.get('bairro')
-        logradouro = request.POST.get('logradouro')
-        numero = request.POST.get('numero')
-        complemento = request.POST.get('complemento')
-        telefone = request.POST.get('telefone')
-
-        if User.objects.filter(username=username).exists():
-            contexto = {'useralredyexist': 'Usuário já existe'}
-            return render(request, 'pages/cadastro_organizador.html', contexto)
-        
-        user = User.objects.create_user(
-            username=username, 
-            first_name=firstname, 
-            last_name=lastname, 
-            email=email, 
-            password=senha)
-        user.save()
-
-        organizador = Organizador.objects.create(
-            user=user,
-            cep=cep,
-            estado=estado,
-            cidade=cidade,
-            bairro=bairro,
-            logradouro=logradouro,
-            numero=numero,
-            complemento=complemento,
-            telefone=telefone
-        )
-        organizador.save()
-        
-        #Tentar geocodificar o CEP
         try:
-            atualizar_coordenadas_usuario(organizador)
+            # Log dos dados recebidos
+            logger.info("Iniciando cadastro de organizador")
+            
+            username = request.POST.get('username')
+            firstname = request.POST.get('firstname')
+            lastname = request.POST.get('lastname')
+            email = request.POST.get('email')
+            senha = request.POST.get('senha')
+            cep = request.POST.get('cep')
+            estado = request.POST.get('estado')
+            cidade = request.POST.get('cidade')
+            bairro = request.POST.get('bairro')
+            logradouro = request.POST.get('logradouro')
+            numero = request.POST.get('numero')
+            complemento = request.POST.get('complemento')
+            telefone = request.POST.get('telefone')
+
+            # Log dos dados (sem senha)
+            logger.info(f"Dados recebidos: username={username}, email={email}, cep={cep}")
+
+            # Validação básica
+            if not all([username, firstname, lastname, email, senha, cep, estado, cidade, bairro, logradouro, numero, telefone]):
+                logger.error("Dados obrigatórios não fornecidos")
+                contexto = {'useralredyexist': 'Todos os campos obrigatórios devem ser preenchidos'}
+                return render(request, 'pages/cadastro_organizador.html', contexto)
+
+            # Verificar se usuário já existe
+            if User.objects.filter(username=username).exists():
+                logger.warning(f"Tentativa de cadastro com username já existente: {username}")
+                contexto = {'useralredyexist': 'Usuário já existe'}
+                return render(request, 'pages/cadastro_organizador.html', contexto)
+            
+            # Criar usuário
+            try:
+                user = User.objects.create_user(
+                    username=username, 
+                    first_name=firstname, 
+                    last_name=lastname, 
+                    email=email, 
+                    password=senha)
+                user.save()
+                logger.info(f"Usuário criado com sucesso: {username}")
+            except Exception as e:
+                logger.error(f"Erro ao criar usuário: {e}")
+                # Se falhar, tentar limpar o usuário se foi criado
+                try:
+                    User.objects.filter(username=username).delete()
+                except:
+                    pass
+                raise e
+
+            # Criar organizador
+            try:
+                organizador = Organizador.objects.create(
+                    user=user,
+                    cep=cep,
+                    estado=estado,
+                    cidade=cidade,
+                    bairro=bairro,
+                    logradouro=logradouro,
+                    numero=numero,
+                    complemento=complemento,
+                    telefone=telefone
+                )
+                organizador.save()
+                logger.info(f"Organizador criado com sucesso para usuário: {username}")
+            except Exception as e:
+                logger.error(f"Erro ao criar organizador: {e}")
+                # Se falhar, limpar o usuário criado
+                try:
+                    user.delete()
+                except:
+                    pass
+                raise e
+            
+            # Tentar geocodificar o CEP (não crítico)
+            try:
+                atualizar_coordenadas_usuario(organizador)
+                logger.info(f"Geocodificação realizada para: {username}")
+            except Exception as e:
+                logger.warning(f"Erro ao geocodificar CEP (não crítico): {e}")
+            
+            logger.info(f"Cadastro de organizador concluído com sucesso: {username}")
+            return render(request, 'pages/login.html')
+            
         except Exception as e:
-            #Se falhar, não impede o cadastro
-            print(f"Erro ao geocodificar CEP: {e}")
-        
-        return render(request, 'pages/login.html')
+            logger.error(f"Erro geral no cadastro de organizador: {e}")
+            # Retornar erro mais específico
+            contexto = {'useralredyexist': f'Erro no cadastro: {str(e)}'}
+            return render(request, 'pages/cadastro_organizador.html', contexto)
 
 def cadastro_fornecedor(request):
     if request.method == "GET":
