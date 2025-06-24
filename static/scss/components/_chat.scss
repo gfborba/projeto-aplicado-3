@@ -1,0 +1,536 @@
+// =============================================================================
+// CHAT STYLES
+// =============================================================================
+
+// Container principal do chat
+.chat-page {
+  padding: 1rem 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, lighten($roxo-3, 25%), lighten($roxo-3, 30%));
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: calc(100vh - 2rem);
+  }
+}
+
+// =============================================================================
+// CHAT ROOM STYLES
+// =============================================================================
+
+// Header do chat
+.chat-header {
+  background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 15%));
+  color: $branco;
+  padding: 1.5rem 2rem;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba($roxo-1, 0.2);
+  
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: $branco;
+  }
+  
+  .username {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 400;
+  }
+  
+  .chat-actions {
+    .btn-secondary {
+      background: rgba($branco, 0.2);
+      color: $branco;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid rgba($branco, 0.3);
+      
+      &:hover {
+        background: rgba($branco, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
+
+// Container principal do chat
+.chat-container {
+  background: $branco;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  overflow: hidden;
+}
+
+// Container de mensagens
+.messages-container {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  background: #f8f9fa; // Fundo mais neutro para melhor contraste
+  
+  // Scrollbar customizada
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba($roxo-3, 0.3);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $roxo-1;
+    border-radius: 4px;
+    
+    &:hover {
+      background: darken($roxo-1, 10%);
+    }
+  }
+}
+
+// Mensagens
+.message {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  
+  &.message-own {
+    align-items: flex-end;
+    
+    .message-content {
+      background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 15%));
+      color: $branco;
+      border-radius: 18px 18px 4px 18px;
+      max-width: 70%;
+      box-shadow: 0 2px 8px rgba($roxo-1, 0.2);
+      
+      .message-text {
+        color: $branco;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      
+      .message-time {
+        color: rgba($branco, 0.9);
+      }
+    }
+    
+    .message-sender {
+      color: $roxo-1;
+      font-weight: 600;
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+    }
+  }
+  
+  &.message-other {
+    align-items: flex-start;
+    
+    .message-content {
+      background: $branco;
+      color: $cinza-texto;
+      border-radius: 18px 18px 18px 4px;
+      max-width: 70%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e9ecef;
+      
+      .message-text {
+        color: $cinza-texto;
+      }
+      
+      .message-time {
+        color: lighten($cinza-texto, 20%);
+      }
+    }
+    
+    .message-sender {
+      color: $roxo-1;
+      font-weight: 600;
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+    }
+  }
+  
+  .message-content {
+    padding: 0.75rem 1rem;
+    position: relative;
+    
+    .message-text {
+      margin: 0 0 0.5rem 0;
+      line-height: 1.4;
+      word-wrap: break-word;
+      font-weight: 500;
+    }
+    
+    .message-time {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// Estado sem mensagens
+.no-messages {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: $cinza-texto;
+  
+  p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-style: italic;
+  }
+}
+
+// Container de input de mensagem
+.message-input-container {
+  background: $branco;
+  padding: 1.5rem;
+  border-top: 1px solid $roxo-3;
+  border-radius: 0 0 12px 12px;
+}
+
+// Formulário de mensagem
+.message-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  
+  #message-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid $roxo-3;
+    border-radius: 25px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: $branco;
+    
+    &:focus {
+      outline: none;
+      border-color: $roxo-1;
+      box-shadow: 0 0 0 3px rgba($roxo-1, 0.1);
+    }
+    
+    &::placeholder {
+      color: lighten($cinza-texto, 20%);
+    }
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+    color: $branco;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    
+    &:hover {
+      background: linear-gradient(135deg, darken($roxo-1, 5%), darken($roxo-1, 15%));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba($roxo-1, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// =============================================================================
+// CHAT LIST STYLES
+// =============================================================================
+
+// Container da lista de conversas
+.chat-list-page {
+  padding: 2rem 0;
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    color: $branco;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+}
+
+// Lista de conversas
+.conversations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+// Item de conversa
+.conversation-item {
+  background: $branco;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid $roxo-3;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba($roxo-1, 0.15);
+    border-color: $roxo-1;
+  }
+  
+  .conversation-info {
+    flex: 1;
+    
+    h3 {
+      color: $roxo-1;
+      margin: 0 0 0.5rem 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    
+    .username {
+      color: $cinza-texto;
+      margin: 0 0 1rem 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .last-message {
+      color: $cinza-texto;
+      margin: 0.5rem 0;
+      line-height: 1.4;
+      
+      strong {
+        color: $roxo-1;
+        font-weight: 600;
+      }
+    }
+    
+    .timestamp {
+      color: lighten($cinza-texto, 15%);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .no-messages {
+      color: lighten($cinza-texto, 20%);
+      font-style: italic;
+      margin: 0.5rem 0;
+    }
+  }
+  
+  .conversation-actions {
+    .btn-primary {
+      background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+      color: $branco;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      
+      &:hover {
+        background: linear-gradient(135deg, darken($roxo-1, 5%), darken($roxo-1, 15%));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba($roxo-1, 0.3);
+      }
+    }
+  }
+}
+
+// Estado vazio
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: $branco;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 2px dashed $roxo-3;
+  
+  p {
+    color: $cinza-texto;
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    
+    &:first-child {
+      color: $roxo-1;
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+  }
+}
+
+// Link de voltar
+.back-link {
+  text-align: center;
+  margin-top: 2rem;
+  
+  a {
+    color: $roxo-1;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid $roxo-1;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    
+    &:hover {
+      background: $roxo-1;
+      color: $branco;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba($roxo-1, 0.3);
+    }
+  }
+}
+
+// =============================================================================
+// RESPONSIVIDADE
+// =============================================================================
+
+@media (max-width: 768px) {
+  .chat-page {
+    padding: 0.5rem;
+    
+    .container {
+      height: calc(100vh - 1rem);
+    }
+  }
+  
+  .chat-header {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    
+    h1 {
+      font-size: 1.3rem;
+    }
+  }
+  
+  .chat-container {
+    height: calc(100vh - 180px);
+  }
+  
+  .messages-container {
+    padding: 1rem;
+  }
+  
+  .message {
+    &.message-own .message-content,
+    &.message-other .message-content {
+      max-width: 85%;
+    }
+  }
+  
+  .message-input-container {
+    padding: 1rem;
+  }
+  
+  .message-form {
+    gap: 0.75rem;
+    
+    #message-input {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.85rem;
+    }
+  }
+  
+  .chat-list-page {
+    padding: 1rem 0;
+    
+    h1 {
+      font-size: 1.8rem;
+    }
+  }
+  
+  .conversation-item {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    
+    .conversation-actions {
+      width: 100%;
+      
+      .btn-primary {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-page {
+    padding: 0;
+    
+    .container {
+      height: 100vh;
+      border-radius: 0;
+    }
+  }
+  
+  .chat-header {
+    border-radius: 0;
+  }
+  
+  .chat-container {
+    border-radius: 0;
+    height: calc(100vh - 160px);
+  }
+  
+  .message {
+    &.message-own .message-content,
+    &.message-other .message-content {
+      max-width: 90%;
+    }
+  }
+  
+  .message-input-container {
+    border-radius: 0;
+  }
+  
+  .chat-list-page {
+    padding: 0.5rem;
+    
+    .container {
+      padding: 0 0.5rem;
+    }
+  }
+  
+  .conversation-item {
+    margin: 0 0.5rem;
+  }
+} 

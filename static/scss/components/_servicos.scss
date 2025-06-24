@@ -1,0 +1,375 @@
+// =============================================================================
+// SERVIÇOS PAGE STYLES
+// =============================================================================
+
+// Container principal da página de serviços
+.servicos-page {
+  padding: 2rem 0;
+  
+  h1 {
+    color: $roxo-1;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.2rem;
+    font-weight: 600;
+  }
+}
+
+// Seção de filtros
+.filtros-section {
+  background: $branco;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid $roxo-3;
+  
+  .filtros-title {
+    color: $roxo-1;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-bottom: 2px solid $roxo-3;
+    padding-bottom: 0.5rem;
+  }
+  
+  .filtros-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    align-items: end;
+    
+    .filtro-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      
+      label {
+        font-weight: 600;
+        color: $cinza-texto;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      select, input {
+        padding: 0.75rem;
+        border: 2px solid $roxo-3;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: $branco;
+        
+        &:focus {
+          outline: none;
+          border-color: $roxo-1;
+          box-shadow: 0 0 0 3px rgba($roxo-1, 0.1);
+        }
+        
+        &::placeholder {
+          color: lighten($cinza-texto, 20%);
+        }
+      }
+      
+      .help-text {
+        font-size: 0.8rem;
+        color: lighten($cinza-texto, 15%);
+        margin-top: 0.25rem;
+      }
+    }
+    
+    .btn-filtrar, .btn-limpar {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .btn-filtrar {
+      background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+      color: $branco;
+      
+      &:hover {
+        background: linear-gradient(135deg, darken($roxo-1, 5%), darken($roxo-1, 15%));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba($roxo-1, 0.3);
+      }
+    }
+    
+    .btn-limpar {
+      background: $roxo-3;
+      color: $roxo-1;
+      
+      &:hover {
+        background: darken($roxo-3, 10%);
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+// Informações dos resultados
+.resultados-info {
+  background: linear-gradient(135deg, $roxo-3, lighten($roxo-3, 10%));
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  border-left: 4px solid $roxo-1;
+  
+  p {
+    margin: 0;
+    color: $roxo-1;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+}
+
+// Grid de serviços
+.servicos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+// Card de serviço
+.servico-card {
+  background: $branco;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid $roxo-3;
+  position: relative;
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba($roxo-1, 0.15);
+    border-color: $roxo-1;
+  }
+  
+  // Imagem do serviço
+  .servico-imagem {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
+  
+  // Conteúdo do card
+  > h3 {
+    color: $roxo-1;
+    padding: 1.5rem 1.5rem 1rem;
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-bottom: 1px solid $roxo-3;
+  }
+  
+  // Informações do fornecedor
+  .fornecedor-info {
+    padding: 1rem 1.5rem;
+    
+    p {
+      margin: 0.5rem 0;
+      color: $cinza-texto;
+      font-size: 0.9rem;
+      
+      strong {
+        color: $roxo-1;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  // Tags do serviço
+  .servico-tags {
+    padding: 0 1.5rem 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    
+    .tag {
+      background: linear-gradient(135deg, $roxo-3, lighten($roxo-3, 5%));
+      color: $roxo-1;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid $roxo-3;
+    }
+    
+    .tag-more {
+      background: $cinza-texto;
+      color: $branco;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+  }
+  
+  // Informações adicionais
+  .servico-info {
+    padding: 0 1.5rem 1rem;
+    
+    .imagens {
+      font-size: 1.2rem;
+      color: $roxo-1;
+    }
+  }
+  
+  // Ações do card
+  .servico-actions {
+    padding: 0 1.5rem 1rem;
+    display: flex;
+    gap: 1rem;
+    
+    .btn-primary, .btn-secondary {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+      color: $branco;
+      
+      &:hover {
+        background: linear-gradient(135deg, darken($roxo-1, 5%), darken($roxo-1, 15%));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba($roxo-1, 0.3);
+      }
+    }
+    
+    .btn-secondary {
+      background: $roxo-3;
+      color: $roxo-1;
+      
+      &:hover {
+        background: darken($roxo-3, 10%);
+        transform: translateY(-2px);
+      }
+    }
+  }
+  
+  // Meta informações
+  .servico-meta {
+    padding: 1rem 1.5rem;
+    background: lighten($roxo-3, 15%);
+    border-top: 1px solid $roxo-3;
+    
+    small {
+      color: lighten($cinza-texto, 10%);
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Estado vazio
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: $branco;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 2px dashed $roxo-3;
+  
+  p {
+    color: $cinza-texto;
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    
+    &:first-child {
+      color: $roxo-1;
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+  }
+}
+
+// Link de voltar
+.back-link {
+  text-align: center;
+  margin-top: 2rem;
+  
+  a {
+    color: $roxo-1;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid $roxo-1;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    
+    &:hover {
+      background: $roxo-1;
+      color: $branco;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba($roxo-1, 0.3);
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .filtros-form {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .servicos-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .servico-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .servico-card {
+    margin: 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .servicos-page {
+    padding: 1rem 0;
+    
+    h1 {
+      font-size: 1.8rem;
+    }
+  }
+  
+  .filtros-section {
+    margin: 0 1rem 1.5rem;
+  }
+  
+  .resultados-info {
+    margin: 0 1rem 1.5rem;
+  }
+} 

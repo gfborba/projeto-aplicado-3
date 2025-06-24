@@ -1,0 +1,719 @@
+// =============================================================================
+// VISUALIZAR SERVIÇO PAGE STYLES
+// =============================================================================
+
+// Container principal da página de visualização
+.visualizar-servico-page {
+  padding: 2rem 0;
+  
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+}
+
+// Header do serviço
+.servico-header {
+  background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 15%));
+  color: $branco;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba($roxo-1, 0.2);
+  
+  h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: $branco;
+  }
+  
+  .servico-status {
+    .status {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &.ativo {
+        background: rgba($branco, 0.2);
+        color: $branco;
+        border: 2px solid rgba($branco, 0.3);
+      }
+    }
+  }
+}
+
+// Informações do fornecedor
+.fornecedor-info {
+  background: $branco;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid $roxo-3;
+
+  .fornecedor-row {
+    display: flex;
+    flex-direction: row;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  .fornecedor-info-content {
+    flex: 1;
+    text-align: left;
+    padding: 20px;
+    border: 1px solid $roxo-3;
+    border-radius: 12px;
+    background-color: $gray-medium;
+    color: $branco;
+  }
+  
+  h3 {
+    color: $roxo-1;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid $roxo-3;
+    padding-bottom: 0.5rem;
+  }
+  
+  p {
+    margin: 0.75rem 0;
+    color: $cinza-texto;
+    font-size: 1rem;
+    line-height: 1.6;
+    
+    strong {
+      color: $roxo-1;
+      font-weight: 600;
+      min-width: 50px;
+      display: inline-block;
+    }
+  }
+  
+  .mapa-section {
+    margin-top: 2rem;
+    flex: 2;
+    
+    h4 {
+      color: $roxo-1;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    #map {
+      border: 2px solid $roxo-3;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// Conteúdo principal do serviço
+.servico-content {
+  background: $branco;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid $roxo-3;
+  
+  .servico-info {
+    margin-bottom: 2rem;
+    
+    h3 {
+      color: $roxo-1;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      border-bottom: 2px solid $roxo-3;
+      padding-bottom: 0.5rem;
+    }
+    
+    p {
+      color: $cinza-texto;
+      line-height: 1.8;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+  }
+  
+  .servico-tags {
+    margin-bottom: 2rem;
+    
+    h3 {
+      color: $roxo-1;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      border-bottom: 2px solid $roxo-3;
+      padding-bottom: 0.5rem;
+    }
+    
+    .tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      
+      .tag {
+        background: linear-gradient(135deg, $roxo-3, lighten($roxo-3, 5%));
+        color: $roxo-1;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid $roxo-3;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+          color: $branco;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba($roxo-1, 0.3);
+        }
+      }
+    }
+  }
+  
+  .servico-imagens {
+    margin-bottom: 2rem;
+    
+    h3 {
+      color: $roxo-1;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      border-bottom: 2px solid $roxo-3;
+      padding-bottom: 0.5rem;
+    }
+    
+    .imagens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      
+      .imagem-item {
+        text-align: center;
+        
+        img {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 8px;
+          border: 2px solid $roxo-3;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          
+          &:hover {
+            transform: scale(1.05);
+            border-color: $roxo-1;
+            box-shadow: 0 8px 25px rgba($roxo-1, 0.2);
+          }
+        }
+        
+        p {
+          margin-top: 0.5rem;
+          color: $cinza-texto;
+          font-size: 0.9rem;
+          font-style: italic;
+        }
+      }
+    }
+  }
+  
+  .servico-meta {
+    background: lighten($roxo-3, 15%);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid $roxo-1;
+    
+    p {
+      margin: 0.5rem 0;
+      color: $cinza-texto;
+      font-size: 0.9rem;
+      
+      strong {
+        color: $roxo-1;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Seção de itens
+.itens-section {
+  background: $branco;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid $roxo-3;
+  
+  h3 {
+    color: $roxo-1;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid $roxo-3;
+    padding-bottom: 0.5rem;
+  }
+  
+  .itens-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    
+    .item-card {
+      background: lighten($roxo-3, 20%);
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid $roxo-3;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba($roxo-1, 0.15);
+        border-color: $roxo-1;
+      }
+      
+      .item-info {
+        h4 {
+          color: $roxo-1;
+          margin: 0 0 1rem 0;
+          font-size: 1.2rem;
+          font-weight: 600;
+        }
+        
+        p {
+          color: $cinza-texto;
+          margin: 0.5rem 0;
+          line-height: 1.6;
+        }
+        
+        img {
+          margin-top: 1rem;
+          border-radius: 6px;
+          border: 2px solid $roxo-3;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            border-color: $roxo-1;
+            transform: scale(1.05);
+          }
+        }
+      }
+    }
+    
+    .empty-items {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: $cinza-texto;
+      font-style: italic;
+      padding: 2rem;
+      background: lighten($roxo-3, 20%);
+      border-radius: 8px;
+      border: 2px dashed $roxo-3;
+    }
+  }
+}
+
+// Ações do serviço
+.servico-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  
+  .btn-primary, .btn-secondary {
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    min-width: 200px;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+    color: $branco;
+    
+    &:hover {
+      background: linear-gradient(135deg, darken($roxo-1, 5%), darken($roxo-1, 15%));
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba($roxo-1, 0.3);
+    }
+  }
+  
+  .btn-secondary {
+    background: $roxo-3;
+    color: $roxo-1;
+    
+    &:hover {
+      background: darken($roxo-3, 10%);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba($roxo-1, 0.2);
+    }
+  }
+}
+
+// Modal de orçamento
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  
+  .modal-content {
+    background: $branco;
+    margin: 3% auto;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid $roxo-3;
+  }
+  
+  .modal-header {
+    background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+    color: $branco;
+    padding: 1.5rem 2rem;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .close {
+      color: $branco;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.1);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+  
+  .modal-body {
+    padding: 2rem;
+    
+    h3 {
+      color: $roxo-1;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    
+    p {
+      color: $cinza-texto;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+  }
+  
+  .eventos-lista {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid $roxo-3;
+    border-radius: 8px;
+    
+    .evento-item {
+      border-bottom: 1px solid $roxo-3;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:hover {
+        background: lighten($roxo-3, 20%);
+        border-left: 4px solid $roxo-1;
+      }
+      
+      h4 {
+        color: $roxo-1;
+        margin: 0 0 0.75rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      
+      p {
+        margin: 0.25rem 0;
+        color: $cinza-texto;
+        font-size: 0.9rem;
+        
+        strong {
+          color: $roxo-1;
+          font-weight: 600;
+        }
+      }
+    }
+    
+    .sem-eventos {
+      text-align: center;
+      color: $cinza-texto;
+      font-style: italic;
+      padding: 2rem;
+      
+      a {
+        color: $roxo-1;
+        text-decoration: none;
+        font-weight: 600;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  
+  .evento-selecionado {
+    background: linear-gradient(135deg, lighten($roxo-3, 15%), lighten($roxo-3, 20%));
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid $roxo-1;
+    
+    h4 {
+      color: $roxo-1;
+      margin: 0 0 1rem 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    p {
+      margin: 0.5rem 0;
+      color: $cinza-texto;
+      
+      strong {
+        color: $roxo-1;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  .itens-selecao {
+    margin-bottom: 2rem;
+    
+    h4 {
+      color: $roxo-1;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .item-selecao {
+      background: $branco;
+      border: 2px solid $roxo-3;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        border-color: $roxo-1;
+        box-shadow: 0 4px 15px rgba($roxo-1, 0.1);
+      }
+      
+      label {
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+        gap: 0.75rem;
+        
+        input[type="checkbox"] {
+          margin-top: 0.25rem;
+          transform: scale(1.2);
+          accent-color: $roxo-1;
+        }
+        
+        strong {
+          color: $roxo-1;
+          font-weight: 600;
+        }
+        
+        small {
+          color: $cinza-texto;
+          font-size: 0.85rem;
+          line-height: 1.4;
+          margin-top: 0.25rem;
+        }
+      }
+    }
+  }
+  
+  .consideracoes {
+    margin-bottom: 2rem;
+    
+    h4 {
+      color: $roxo-1;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid $roxo-3;
+      border-radius: 8px;
+      resize: vertical;
+      font-family: inherit;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      transition: all 0.3s ease;
+      
+      &:focus {
+        outline: none;
+        border-color: $roxo-1;
+        box-shadow: 0 0 0 3px rgba($roxo-1, 0.1);
+      }
+      
+      &::placeholder {
+        color: lighten($cinza-texto, 20%);
+      }
+    }
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    
+    .btn-primary, .btn-secondary {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      min-width: 120px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, $roxo-1, darken($roxo-1, 10%));
+      color: $branco;
+      
+      &:hover {
+        background: linear-gradient(135deg, darken($roxo-1, 5%), darken($roxo-1, 15%));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba($roxo-1, 0.3);
+      }
+    }
+    
+    .btn-secondary {
+      background: $roxo-3;
+      color: $roxo-1;
+      
+      &:hover {
+        background: darken($roxo-3, 10%);
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .servico-header {
+    padding: 1.5rem;
+    
+    h1 {
+      font-size: 2rem;
+    }
+  }
+  
+  .fornecedor-info,
+  .servico-content,
+  .itens-section {
+    padding: 1.5rem;
+    margin: 0 1rem 1.5rem;
+  }
+  
+  .servico-actions {
+    flex-direction: column;
+    align-items: center;
+    
+    .btn-primary, .btn-secondary {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+  
+  .modal .modal-content {
+    width: 95%;
+    margin: 5% auto;
+  }
+  
+  .modal .modal-actions {
+    flex-direction: column;
+    
+    .btn-primary, .btn-secondary {
+      width: 100%;
+    }
+  }
+  
+  .servico-content .servico-imagens .imagens-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .itens-section .itens-lista {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .visualizar-servico-page {
+    padding: 1rem 0;
+  }
+  
+  .servico-header {
+    padding: 1rem;
+    
+    h1 {
+      font-size: 1.8rem;
+    }
+  }
+  
+  .fornecedor-info,
+  .servico-content,
+  .itens-section {
+    padding: 1rem;
+    margin: 0 0.5rem 1rem;
+  }
+  
+  .modal .modal-body {
+    padding: 1rem;
+  }
+} 
