@@ -134,7 +134,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': dj_database_url.config(
         # Replace this value with your local database's connection string.
-        default=os.getenv('DATABASE_URL', 'sqlite:///' + str(BASE_DIR / 'db.sqlite3')),
+        default=os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/eventos_db'),
         conn_max_age=600
     )
 }
